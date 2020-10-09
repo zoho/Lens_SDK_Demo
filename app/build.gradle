@@ -68,7 +68,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:1.3.61"
     testImplementation 'junit:junit:4.12'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    api('com.zoho.lens:lens-android:0.1')
+    api('com.zoho.lens:lens-android:0.2')
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.2'
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.2'
     // Optional, if you use support library fragments:

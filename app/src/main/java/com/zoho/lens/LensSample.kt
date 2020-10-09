@@ -14,6 +14,7 @@ import kotlinx.android.synthetic.main.activity_lens.*
 
 class LensSample : AppCompatActivity() {
 
+
     internal var changedMuteSelf: Boolean = false
 
     override fun onSupportNavigateUp(): Boolean {
@@ -31,15 +32,19 @@ class LensSample : AppCompatActivity() {
             throw RuntimeException("ViewModel variable not set. Check the types")
         }
         viewDataBinding.executePendingBindings()
+          var isAR: Boolean=false
         var sdkToken: String = ""
         val sessionKey = intent.getStringExtra("sessionKey")
         val baseUrl = intent.getStringExtra("baseUrl")
         if (intent.hasExtra("sdkToken")) {
             sdkToken = intent.getStringExtra("sdkToken") as String
         }
+        if (intent.hasExtra("isAR")) {
+            isAR = intent.getBooleanExtra("isAR",false) as Boolean
+        }
 
         LensSDK.setCallbackListener(SessionCallbacks(this))
-            .setARMode(false)
+            .setARMode(isAR)
             .setWebRTCRenderView(render_view)
             .startSession(sessionKey = sessionKey, sdkToken = sdkToken, baseUrl = baseUrl)
 

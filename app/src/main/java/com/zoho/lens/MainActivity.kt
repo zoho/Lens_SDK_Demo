@@ -14,8 +14,8 @@ import androidx.core.content.ContextCompat
 import com.zoho.assistrtc.LensSDK
 import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
+    private var isAR: Boolean = false
     var TAG = MainActivity::class.java.canonicalName as String
-    var grid: String = ""
     private lateinit var dialog: AlertDialog
 
     var API_BASE_URL = "https://lens.zoho.com"
@@ -33,6 +33,9 @@ class MainActivity : AppCompatActivity() {
         sdkTokenText.setText("")
 
         baseUrlEdittext.setText(API_BASE_URL)
+        ar_support.setOnCheckedChangeListener { _, isChecked ->
+            isAR =  isChecked
+        }
 
         ok_button.setOnClickListener {
             API_BASE_URL = baseUrlEdittext.text.toString()
@@ -40,6 +43,7 @@ class MainActivity : AppCompatActivity() {
             intent.putExtra("sessionKey", key_edittext.text.toString())
             intent.putExtra("baseUrl", API_BASE_URL)
             intent.putExtra("sdkToken", sdkTokenText.text.toString())
+            intent.putExtra("isAR", isAR)
             startActivity(intent)
         }
         if(ContextCompat.checkSelfPermission(this@MainActivity,
