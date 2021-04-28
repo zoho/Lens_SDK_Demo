@@ -8,16 +8,6 @@
     tools:context=".MainActivity">
 
 
-    <Switch
-        android:id="@+id/sdk_mode"
-        style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:layout_margin="10dp"
-        android:text="Switch"
-        android:visibility="gone"/>
-
 
     <ScrollView
         android:layout_width="match_parent"
@@ -45,49 +35,6 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:hint="SDK Token">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/sdktoken_edittext"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:hint="AuthToken"
-                android:visibility="gone">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/authtoken_edittext"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    />
-            </com.google.android.material.textfield.TextInputLayout>
-
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:hint="Base URL">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/server_edittext"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    />
-            </com.google.android.material.textfield.TextInputLayout>
 
             <Switch
                 android:id="@+id/ar_support"
@@ -97,8 +44,6 @@
                 android:layout_gravity="fill"
                 android:layout_margin="0dp"
                 android:text="AR Support" />
-
-
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -110,11 +55,11 @@
 
                 <Button
                     android:id="@+id/ok_button"
-                    style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
-                    android:text="Start" />
+                    android:text="Start"
+                    tools:ignore="HardcodedText" />
             </LinearLayout>
 
         </LinearLayout>

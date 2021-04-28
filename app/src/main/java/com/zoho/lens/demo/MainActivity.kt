@@ -1,4 +1,4 @@
-package com.zoho.lens
+package com.zoho.lens.demo
 
 import android.Manifest
 import android.app.AlertDialog
@@ -11,38 +11,27 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.zoho.assistrtc.LensSDK
+import com.zoho.lens.LensSDK
 import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
     private var isAR: Boolean = false
     var TAG = MainActivity::class.java.canonicalName as String
     private lateinit var dialog: AlertDialog
-
-    var API_BASE_URL = "https://lens.zoho.com"
-    var DEFAULT_SESSION_KEY = ""
-
-
+    var DEFAULT_SESSION_KEY = "371007523"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val edittext = findViewById<EditText>(R.id.key_edittext)
-        val baseUrlEdittext = findViewById<EditText>(R.id.server_edittext)
-        val sdkTokenText =  findViewById<EditText>(R.id.sdktoken_edittext)
 
         edittext.setText(DEFAULT_SESSION_KEY)
-        sdkTokenText.setText("")
 
-        baseUrlEdittext.setText(API_BASE_URL)
         ar_support.setOnCheckedChangeListener { _, isChecked ->
             isAR =  isChecked
         }
 
         ok_button.setOnClickListener {
-            API_BASE_URL = baseUrlEdittext.text.toString()
             val intent = Intent(this@MainActivity, LensSample::class.java)
             intent.putExtra("sessionKey", key_edittext.text.toString())
-            intent.putExtra("baseUrl", API_BASE_URL)
-            intent.putExtra("sdkToken", sdkTokenText.text.toString())
             intent.putExtra("isAR", isAR)
             startActivity(intent)
         }
@@ -81,9 +70,7 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == CAMERA_PERMISSION_CODE) {
 
             // Checking whether user granted the permission or not.
-            if (grantResults.size > 0
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED
-            ) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                 // Showing the toast message
                 Toast.makeText(

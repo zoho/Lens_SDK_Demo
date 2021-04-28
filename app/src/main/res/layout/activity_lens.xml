@@ -1,40 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
-
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    >
     <data>
 
         <variable
-            name="lensSessionViewModel"
-            type="com.zoho.lens.LensViewModel" />
+            name="viewmodel"
+            type="com.zoho.lens.demo.LensViewModel" />
     </data>
+
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.zoho.assistrtc.view.WebRTCRenderView
-            android:id="@+id/render_view"
+        <com.zoho.lens.view.StreamingView
+            android:id="@+id/stream_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        </com.zoho.assistrtc.view.WebRTCRenderView>
+        </com.zoho.lens.view.StreamingView>
 
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:visibility="visible"
-            >
+            android:visibility="visible">
 
             <HorizontalScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                >
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/swap_camera"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Swap"
+                        android:visibility="visible"/>
+
+                    <ToggleButton
+                        android:id="@+id/mute_unmute_self"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="false"
+                        android:textOff="Unmuted Self"
+                        android:textOn="Muted Self" />
 
                     <ToggleButton
                         android:id="@+id/speaker"
@@ -53,21 +69,6 @@
                         android:textOn="Video On" />
 
                     <Button
-                        android:id="@+id/swap_camera"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Swap" />
-
-                    <ToggleButton
-                        android:id="@+id/mute_unmute_self"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="false"
-                        android:textOff="Unmuted Self"
-                        android:textOn="Muted Self" />
-
-
-                    <Button
                         android:id="@+id/close"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -75,27 +76,38 @@
                 </LinearLayout>
             </HorizontalScrollView>
 
-            <HorizontalScrollView
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="50dp"
+                android:background="@color/colorPrimary"
+                android:orientation="horizontal"
+                android:visibility="gone">
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-                    <Button
-                        android:id="@+id/clear_annotations"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Clear annotation"
-                        android:visibility="visible" />
-                </LinearLayout>
-            </HorizontalScrollView>
+                <Button
+                    android:id="@+id/red"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp" />
+
+                <Button
+                    android:id="@+id/green"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp" />
+
+                <Button
+                    android:id="@+id/yellow"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp" />
+
+                <Button
+                    android:id="@+id/orange"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp" />
 
 
-
+            </LinearLayout>
 
         </LinearLayout>
+
     </FrameLayout>
 
 </layout>

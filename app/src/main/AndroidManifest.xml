@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.zoho.lens">
+    package="com.zoho.lens.demo">
 
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <!--<uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />-->
@@ -10,15 +10,18 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <application
+
+
+        android:name=".LensApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        tools:replace="android:allowBackup"
         android:theme="@style/AppTheme"
-        android:name=".LensApplication">
-        <activity android:name="com.zoho.lens.MainActivity">
+        tools:replace="android:theme,android:allowBackup"
+         >
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -26,11 +29,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.zoho.lens.LensSample"
+            android:name=".LensSample"
             android:configChanges="orientation|screenSize" />
 
         <receiver
-            android:name="com.zoho.lens.NetworkListenerService"
+            android:name=".NetworkListenerService"
             android:label="NetworkConnection">
             <intent-filter>
                 <action
