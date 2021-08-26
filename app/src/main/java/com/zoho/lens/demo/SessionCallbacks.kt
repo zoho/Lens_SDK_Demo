@@ -178,7 +178,7 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
     /**
      * Callback used to perform any operation whenever the audio device gets changed.
      */
-    override fun audioDeviceChange(selectedAudioDevice: AppRTCAudioManager.AudioDevice, availableAudioDevices: MutableSet<AppRTCAudioManager.AudioDevice>) {
+    override fun audioDeviceChange(selectedAudioDevice: AudioDevice, availableAudioDevices: MutableSet<AudioDevice>) {
 
         /*
         * List down the devices and switch the audio mode

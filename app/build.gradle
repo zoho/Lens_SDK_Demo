@@ -9,11 +9,6 @@ apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 29
-    repositories {
-        maven {
-            url "https://maven.zohodl.com/"
-        }
-    }
     defaultConfig {
         applicationId "com.zoho.lens"
         minSdkVersion 21
@@ -67,7 +62,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:1.4.21"
     testImplementation 'junit:junit:4.13.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation ('com.zoho:lens:1.0')
+    implementation ('com.zoho:lens:1.0.0')
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.2'
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.2'
     // Optional, if you use support library fragments:

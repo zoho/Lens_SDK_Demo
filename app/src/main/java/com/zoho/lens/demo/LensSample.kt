@@ -6,10 +6,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.DataBindingUtil.setContentView
 import androidx.lifecycle.ViewModelProviders
+import com.zoho.lens.AudioDevice
 import com.zoho.lens.LensSDK
 import com.zoho.lens.UserInfo
 import com.zoho.lens.demo.databinding.ActivityLensBinding
-import com.zoho.webrtc.AppRTCAudioManager
 import kotlinx.android.synthetic.main.activity_lens.*
 
 
@@ -36,11 +36,7 @@ class LensSample : AppCompatActivity() {
         viewDataBinding.executePendingBindings()
         viewDataBinding.executePendingBindings()
         var isAR: Boolean=false
-        var sdkToken: String = ""
         sessionKey = intent.getStringExtra("sessionKey")
-        if (intent.hasExtra("sdkToken")) {
-            sdkToken = intent.getStringExtra("sdkToken") as String
-        }
 
         if (intent.hasExtra("isAR")) {
             isAR = intent.getBooleanExtra("isAR",false)
@@ -122,9 +118,9 @@ class LensSample : AppCompatActivity() {
         speaker.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 //speaker on
-                LensSDK.switchAudioMode(AppRTCAudioManager.AudioDevice.SPEAKER_PHONE)
+                LensSDK.switchAudioMode(AudioDevice.SPEAKER_PHONE)
             } else {
-                LensSDK.switchAudioMode(AppRTCAudioManager.AudioDevice.EARPIECE)
+                LensSDK.switchAudioMode(AudioDevice.EARPIECE)
             }
         }
 
@@ -134,9 +130,9 @@ class LensSample : AppCompatActivity() {
 
         speaker.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                LensSDK.switchAudioMode(AppRTCAudioManager.AudioDevice.SPEAKER_PHONE)
+                LensSDK.switchAudioMode(AudioDevice.SPEAKER_PHONE)
             } else {
-                LensSDK.switchAudioMode(AppRTCAudioManager.AudioDevice.EARPIECE)
+                LensSDK.switchAudioMode(AudioDevice.EARPIECE)
             }
         }
 

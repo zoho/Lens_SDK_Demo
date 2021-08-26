@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity() {
         ok_button.setOnClickListener {
             val intent = Intent(this@MainActivity, LensSample::class.java)
             intent.putExtra("sessionKey", key_edittext.text.toString())
+            intent.putExtra("sessionKey", key_edittext.text.toString())
             intent.putExtra("isAR", isAR)
             startActivity(intent)
         }
