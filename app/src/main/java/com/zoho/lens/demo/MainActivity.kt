@@ -36,27 +36,23 @@ class MainActivity : AppCompatActivity() {
             intent.putExtra("isAR", isAR)
             startActivity(intent)
         }
-        if(ContextCompat.checkSelfPermission(this@MainActivity,
-                Manifest.permission.CAMERA)
-            != PackageManager.PERMISSION_GRANTED)
-        {
-            // Permission is not granted
-            checkPermission(Manifest.permission.CAMERA,
-                CAMERA_PERMISSION_CODE);
-        }
+        
+        checkPermission(arrayListOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO), CAMERA_PERMISSION_CODE);
 
     }
 
-    fun checkPermission(permission: String, requestCode: Int) {
+    fun checkPermission(permissions: ArrayList<String>, requestCode: Int) {
 
         // Checking if permission is not granted
-        if (ContextCompat.checkSelfPermission(this@MainActivity, permission) == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(this@MainActivity, arrayOf(permission), requestCode)
+        if (permissions.any { permission -> ContextCompat.checkSelfPermission(this@MainActivity, permission) == PackageManager.PERMISSION_DENIED }) {
+            ActivityCompat.requestPermissions(this@MainActivity, permissions.toTypedArray(), requestCode)
         } else {
-            Toast.makeText(this@MainActivity, "Permission already granted", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this@MainActivity, "Permissions already granted", Toast.LENGTH_SHORT).show()
         }
     }
+
     private val CAMERA_PERMISSION_CODE = 100
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String?>,
@@ -76,14 +72,14 @@ class MainActivity : AppCompatActivity() {
                 // Showing the toast message
                 Toast.makeText(
                     this@MainActivity,
-                    "Camera Permission Granted",
+                    "Permissions Granted",
                     Toast.LENGTH_SHORT
                 )
                     .show()
             } else {
                 Toast.makeText(
                     this@MainActivity,
-                    "Camera Permission Denied",
+                    "Permissions Denied",
                     Toast.LENGTH_SHORT
                 )
                     .show()
