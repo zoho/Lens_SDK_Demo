@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    >
+    xmlns:tools="http://schemas.android.com/tools">
+
     <data>
 
         <variable
             name="viewmodel"
             type="com.zoho.lens.demo.LensViewModel" />
     </data>
-
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -20,7 +20,6 @@
 
         </com.zoho.lens.view.StreamingView>
 
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -29,8 +28,7 @@
 
             <HorizontalScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                >
+                android:layout_height="wrap_content">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -41,7 +39,7 @@
                         android:id="@+id/swap_camera"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Swap"
+                        android:text="Swap Camera"
                         android:visibility="visible"/>
 
                     <ToggleButton
@@ -49,32 +47,94 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:checked="false"
-                        android:textOff="Unmuted Self"
-                        android:textOn="Muted Self" />
+                        android:textOff="Mute Audio"
+                        android:textOn="UnMute Audio" />
 
                     <ToggleButton
                         android:id="@+id/speaker"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:checked="true"
-                        android:textOff="Speaker OFF"
-                        android:textOn="Speaker On" />
+                        android:textOff="Speaker Phone"
+                        android:textOn="Earpiece" />
 
                     <ToggleButton
                         android:id="@+id/video"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:checked="false"
+                        android:textOff="Freeze Video"
+                        android:textOn="Unfreeze Video" />
+
+                    <Button
+                        android:id="@+id/ocr_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="Live Text"
+                        android:visibility="visible"/>
+
+                    <Button
+                        android:id="@+id/qr_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="Scan"
+                        android:visibility="visible"/>
+
+                    <ToggleButton
+                        android:id="@+id/share_camera"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
                         android:checked="true"
-                        android:textOff="Video OFF"
-                        android:textOn="Video On" />
+                        android:textOff="Video On"
+                        android:textOn="Video Off"
+                        android:visibility="visible"/>
+
+                    <ToggleButton
+                        android:id="@+id/zoom"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:textOff="Zoom"
+                        android:textOn="Zoom Out"
+                        android:visibility="visible"/>
+
+                    <Button
+                        android:id="@+id/undo_annotation"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="Undo Annotation"
+                        android:visibility="visible"/>
+
+                    <Button
+                        android:id="@+id/clear_all_annotation"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="Clear All Annotations"
+                        android:visibility="visible"/>
 
                     <Button
                         android:id="@+id/close"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Close" />
+                        android:text="Close Session" />
                 </LinearLayout>
             </HorizontalScrollView>
+
+            <SeekBar
+                android:id="@+id/zoom_seekbar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingTop="16dp"
+                android:paddingBottom="12dp"
+                android:progress="0"
+                android:visibility="gone"
+                android:progressBackgroundTint="@color/white"
+                android:thumb="@drawable/seekbar_thumb" />
 
             <LinearLayout
                 android:layout_width="match_parent"

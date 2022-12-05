@@ -1,15 +1,18 @@
 package com.zoho.lens.demo
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import androidx.databinding.DataBindingUtil.setContentView
 import androidx.lifecycle.ViewModelProviders
 import com.zoho.lens.AudioDevice
 import com.zoho.lens.LensSDK
 import com.zoho.lens.UserInfo
 import com.zoho.lens.demo.databinding.ActivityLensBinding
+import com.zoho.lens.handler.QRHandler
 import kotlinx.android.synthetic.main.activity_lens.*
 
 
@@ -33,15 +36,13 @@ class LensSample : AppCompatActivity() {
         }
         viewDataBinding.executePendingBindings()
 
-        viewDataBinding.executePendingBindings()
-        viewDataBinding.executePendingBindings()
-        var isAR: Boolean=false
+        var isAR = false
         sessionKey = intent.getStringExtra("sessionKey")
+        val baseUrl = intent.getStringExtra("baseUrl")
 
         if (intent.hasExtra("isAR")) {
             isAR = intent.getBooleanExtra("isAR",false)
         }
-
 
         /**
          * Set callback listener for the session
@@ -50,6 +51,7 @@ class LensSample : AppCompatActivity() {
             //Optional, Set whether the AR mode enable or disable for .
             .setARMode(isAR)
             //Optional,  Enable or disable high quality resolution for AR session
+            .setResolution(true)
             /**
              * Set the current best knowledge of a real-world planar surface and detect the objects.
              */
@@ -57,23 +59,25 @@ class LensSample : AppCompatActivity() {
             .addStreamingView(stream_view)
             //Optional,  Update customer info
             .setUserInfo(UserInfo("Client Name",mailId))
-            //  sessionkey to start the valid session
+            //  session key to start the valid session
             //  Required, Set the sdkToken to be used for validation
             //  Required, Set the authToken to be used for technician validation
-            .startSession(sessionKey = sessionKey )
-
+            .startSession(sessionKey = sessionKey, baseUrl= baseUrl)
 
 
         red.setOnClickListener {
             LensSDK.setAnnotationColor("#FF0000")
         }
+
         green.setOnClickListener {
             LensSDK.setAnnotationColor("#008000")
 
         }
+
         yellow.setOnClickListener {
             LensSDK.setAnnotationColor("#FFFF00")
         }
+
         orange.setOnClickListener {
             LensSDK.setAnnotationColor("#00FF00")
         }
@@ -124,8 +128,8 @@ class LensSample : AppCompatActivity() {
             }
         }
 
-        video.setOnCheckedChangeListener { buttonView, isChecked ->
-            LensSDK.muteVideo(!isChecked)
+        video.setOnCheckedChangeListener { _, isChecked ->
+            LensSDK.muteVideo(isChecked)
         }
 
         speaker.setOnCheckedChangeListener { _, isChecked ->
@@ -136,17 +140,51 @@ class LensSample : AppCompatActivity() {
             }
         }
 
-        video.setOnCheckedChangeListener { buttonView, isChecked ->
-            LensSDK.muteVideo(isChecked)
+        ocr_button.setOnClickListener {
+            LensSDK.requestOCR()
+        }
+
+        qr_button.setOnClickListener {
+            LensSDK.requestQR(isSilent = false, shouldContinuouslyRetry = QRHandler.RetryMode.RETRY_CONTINOUSLY)
+        }
+
+        share_camera.setOnCheckedChangeListener { buttonView, isChecked ->
             if (isChecked) {
-//                LensSDK.unMuteVideoStreaming()
+                LensSDK.shareCameraRequest()
             } else {
-//                LensSDK.muteVideoStreaming()
+                LensSDK.stopCameraRequest()
             }
         }
 
+        zoom.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                zoom_seekbar.visibility = View.VISIBLE
+            } else {
+                zoom_seekbar.visibility = View.GONE
+            }
+        }
 
+        undo_annotation.setOnClickListener {
+            LensSDK.undoAnnotation()
+        }
 
+        clear_all_annotation.setOnClickListener {
+            LensSDK.clearAllAnnotations()
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            zoom_seekbar.min = 0
+        }
+        zoom_seekbar.max = 100
+        zoom_seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                LensSDK.setZoomPercentage(progress.toFloat()/100f)
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) { }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) { }
+        })
     }
 
     override fun onPause() {
@@ -167,6 +205,11 @@ class LensSample : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         LensSDK.onStop()
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        LensSDK.closeSession()
     }
 
     internal fun onClosedSession() {
