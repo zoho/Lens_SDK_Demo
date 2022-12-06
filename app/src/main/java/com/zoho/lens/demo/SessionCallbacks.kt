@@ -355,7 +355,9 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
 
     override fun onQRFailure(errorMessage: String, willRetry: Boolean) {
         activity.runOnUiThread {
-            Toast.makeText(activity, errorMessage, Toast.LENGTH_SHORT).show()
+            if (!willRetry) {
+                Toast.makeText(activity, errorMessage, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }
