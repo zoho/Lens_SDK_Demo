@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.WindowInsets
+import android.view.WindowManager
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -44,6 +46,12 @@ class LensSample : AppCompatActivity() {
             isAR = intent.getBooleanExtra("isAR",false)
         }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.insetsController?.hide(WindowInsets.Type.statusBars())
+        } else {
+            window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        }
+
         /**
          * Set callback listener for the session
          */
@@ -71,7 +79,6 @@ class LensSample : AppCompatActivity() {
 
         green.setOnClickListener {
             LensSDK.setAnnotationColor("#008000")
-
         }
 
         yellow.setOnClickListener {
@@ -80,24 +87,6 @@ class LensSample : AppCompatActivity() {
 
         orange.setOnClickListener {
             LensSDK.setAnnotationColor("#00FF00")
-        }
-
-        swap_camera.setOnClickListener {
-            LensSDK.onSwapCamera()
-        }
-
-        close.setOnClickListener {
-            LensSDK.closeSession()
-        }
-
-        mute_unmute_self.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                changedMuteSelf = true
-                LensSDK.muteAudio(true)
-            } else {
-                changedMuteSelf = true
-                LensSDK.muteAudio(false)
-            }
         }
 
         swap_camera.setOnClickListener {
@@ -132,14 +121,6 @@ class LensSample : AppCompatActivity() {
             LensSDK.muteVideo(isChecked)
         }
 
-        speaker.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                LensSDK.switchAudioMode(AudioDevice.SPEAKER_PHONE)
-            } else {
-                LensSDK.switchAudioMode(AudioDevice.EARPIECE)
-            }
-        }
-
         ocr_button.setOnClickListener {
             LensSDK.requestOCR()
         }
@@ -148,7 +129,7 @@ class LensSample : AppCompatActivity() {
             LensSDK.requestQR(isSilent = false, shouldContinuouslyRetry = QRHandler.RetryMode.RETRY_CONTINOUSLY)
         }
 
-        share_camera.setOnCheckedChangeListener { buttonView, isChecked ->
+        share_camera.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 LensSDK.shareCameraRequest()
             } else {
@@ -175,6 +156,7 @@ class LensSample : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             zoom_seekbar.min = 0
         }
+
         zoom_seekbar.max = 100
         zoom_seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -218,6 +200,5 @@ class LensSample : AppCompatActivity() {
         startActivity(intentMain)
         finish()
     }
-
 }
 

@@ -7,7 +7,7 @@ import com.zoho.lens.LensSDK
 class LensApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        LensSDK.setToken(this, "TOKEN") //
+        LensSDK.setToken(this, "") //you need to set your token here
         if (LeakCanary.isInAnalyzerProcess(this)) {
             return
         }
