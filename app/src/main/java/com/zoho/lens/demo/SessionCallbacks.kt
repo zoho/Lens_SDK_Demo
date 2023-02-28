@@ -53,7 +53,6 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
              * Handle the results of validating the session.
              */
             LensType.VALID -> {
-                LensSDK.joinSession()
             }
             LensType.ERROR -> {
                 activity.runOnUiThread {
@@ -87,33 +86,21 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
             // * isFirst - State of the boolean value true is first peer and false is second peer
             // * message- peer connection state info
 
-            LensType.PEER_CONNECTED -> {
-            }
-            LensType.PEER_DISCONNECTED -> {
-            }
-            LensType.ICE_STATE_CONNECTED -> {
-            }
-            LensType.ICE_STATE_DISCONNECTED -> {
-            }
-            LensType.ICE_STATE_FAILED -> {
-            }
-            LensType.ICE_STATE_RECONNECTED -> {
-            }
+            LensType.PEER_CONNECTED -> {}
+            LensType.PEER_DISCONNECTED -> {}
+            LensType.ICE_STATE_CONNECTED -> {}
+            LensType.ICE_STATE_DISCONNECTED -> {}
+            LensType.ICE_STATE_FAILED -> {}
+            LensType.ICE_STATE_RECONNECTED -> {}
 
             /**
              * To perform participant join state
              */
-            LensType.CONNECTION_INITIATED -> {
-            }
-            LensType.COMPLETED_PARTICIPANT_JOIN -> {
-            }
-            LensType.CUSTOMER_LEFT_SESSION -> {
-            }
-            LensType.TECHNICIAN_LEFT_SESSION -> {
-            }
-            LensType.INVITE_PARTICIPANT -> {
-
-            }
+            LensType.CONNECTION_INITIATED -> {}
+            LensType.COMPLETED_PARTICIPANT_JOIN -> {}
+            LensType.CUSTOMER_LEFT_SESSION -> {}
+            LensType.TECHNICIAN_LEFT_SESSION -> {}
+            LensType.INVITE_PARTICIPANT -> {}
             LensType.SECONDARY_TECHNICIAN_LEFT_SESSION -> {}
             LensType.SERVER_ISSUE_LEFT_SESSION -> {}
             LensType.SOCKET_CLOSED -> {}
@@ -121,6 +108,8 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
             LensType.CLIENT_IS_NOT_COMPATIBLE -> {}
             LensType.ICE_STATE_CLOSED -> {}
             LensType.ICE_STATE_NEW -> {}
+            LensType.ICE_CANDIDATES_LOCAL_CONNECTION_FAILURE -> {}
+            LensType.ICE_CANDIDATES_REMOTE_CONNECTION_FAILURE -> {}
         }
 
         if (message.isNotEmpty()) {
@@ -136,9 +125,24 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
     override fun chatMessage(message: ChatModel) {
     }
 
+    override fun clientAlreadyActiveInSession() {
+        TODO("Not yet implemented")
+    }
+
     override fun onLensScreenShotTaken() {
         activity.runOnUiThread {
             Toast.makeText(activity, "Screenshot taken", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /**
+     * Callback used to perform before starting session microphone is available to use.
+     */
+
+    override fun onMicroPhoneUsingByOtherApps() {
+        activity.runOnUiThread {
+            Toast.makeText(activity, "Your microphone is being used by another app. Close any apps that are using the microphone and try again.", Toast.LENGTH_LONG).show()
+            activity.finish()
         }
     }
 
@@ -147,6 +151,36 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
      */
     override fun log(tag: String, message: String) {
         Log.d(tag, message)
+    }
+
+    /**
+     * Callback used to perform any operation related to ar comments.
+     */
+    override fun onArAnnotationDeSelected(arAnnotationObject: ArAnnotationObject) {
+
+    }
+
+    override fun onArAnnotationListUpdate(arAnnotationList: ArrayList<ArAnnotationObject>) {
+
+    }
+
+    override fun onArAnnotationNotesUpdate(arAnnotationObject: ArAnnotationObject) {
+        activity.runOnUiThread {
+            val arComment = arAnnotationObject.notes?.get(0)?.data
+            Toast.makeText(activity, arComment, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    override fun onArAnnotationPlaced(arAnnotationObject: ArAnnotationObject) {
+
+    }
+
+    override fun onArAnnotationRemoved(arAnnotationList: ArrayList<ArAnnotationObject>) {
+
+    }
+
+    override fun onArAnnotationSelected(arAnnotationObject: ArAnnotationObject) {
+
     }
 
     /**
@@ -159,8 +193,6 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
     /**
      * Callback used to handle the video freeze state
      */
-    override fun freezeLockState(block: Boolean, freezerName: String) {
-    }
 
     /**
      * Session is already active in another location so we can't open.
@@ -199,10 +231,6 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         }
     }
 
-    /**
-     * Callback used to perform any operation whenever a screenshot is taken.
-     */
-
 
     /**
      * Callback used to perform any operation whenever the audio device gets changed.
@@ -212,14 +240,6 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         * List down the devices and switch the audio mode
         */
         LensSDK.switchAudioMode(selectedAudioDevice)
-    }
-
-    override fun onArFailureReasonTech(arFailureReason: TrackingFailureReason) {
-
-    }
-
-    override fun onCustomerActions(customerActions: CustomerActions) {
-
     }
 
     /**
@@ -257,6 +277,9 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
     override fun annotationSelection(isSelected: Boolean, id: String?) {
     }
 
+    /**
+     * Callback used to perform any operation whenever streaming type is changing.
+     */
     override fun showStreamingType(type: StreamingType, displayName: String?) {
         activity.runOnUiThread {
             when (type) {
