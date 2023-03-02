@@ -58,6 +58,7 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                 activity.runOnUiThread {
                     if (error == ErrorType.UPDATE_TO_LATEST_APP) {
                         Toast.makeText(activity, "An upgraded version of Zoho Lens is now available. To continue using Zoho Lens, kindly update the application from the PlayStore.", Toast.LENGTH_LONG).show()
+                        activity.finish()
                     } else {
                         Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
                         activity.startActivity(Intent(activity, MainActivity::class.java))
