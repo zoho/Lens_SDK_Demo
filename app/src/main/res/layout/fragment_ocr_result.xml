@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+            tools:background="@android:color/transparent">
+
+            <LinearLayout
+                android:background="@drawable/rounded_left_right_top"
+                android:backgroundTint="#EEF5FF"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/session_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:paddingVertical="4dp"
+                    android:layout_weight="1"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:text="@string/scan_result_title"/>
+                <ImageView
+                    android:id="@+id/cancelOcrResult"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_close_black"
+                    android:paddingHorizontal="12dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/link_warning_container"
+                android:background="#F5F9FF"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_info_outline"
+                    android:layout_marginStart="24dp" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:paddingVertical="4dp"
+                    android:layout_weight="1"
+                    android:textColor="#798493"
+                    android:textSize="12sp"
+                    android:text="@string/scan_link_warning" />
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/ocrEditText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/white"
+                android:text=""
+                android:textColor="@color/black"
+                android:inputType="textMultiLine"
+                android:paddingHorizontal="10dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="24dp"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/qr_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/white"
+                android:text=""
+                android:textColor="@color/black"
+                android:autoLink="all"
+                android:inputType="textMultiLine"
+                android:paddingHorizontal="10dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="24dp"
+                android:textSize="16sp"/>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/ocr_bottom_container"
+                android:background="@color/white"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="8dp"
+                    android:visibility="gone"
+                    android:background="#E0E8F3"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <TextView
+                    android:id="@+id/ocr_send_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:textColor="#22B04A"
+                    android:textSize="16sp"
+                    android:paddingVertical="12dp"
+                    android:paddingHorizontal="24dp"
+                    android:layout_margin="12dp"
+                    android:textStyle="bold"
+                    android:background="@drawable/button_outline_scan_send"
+                    android:text="Send Via Chat" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</layout>

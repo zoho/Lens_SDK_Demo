@@ -4,11 +4,12 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 30
+
     defaultConfig {
         applicationId "com.zoho.lens"
         minSdkVersion 21
-        targetSdkVersion 30
+        compileSdk 33
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -50,15 +51,15 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.21"
-    implementation "org.jetbrains.kotlin:kotlin-reflect:1.4.21"
-    testImplementation 'junit:junit:4.13.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'com.google.android.material:material:1.2.1'
-    implementation ('com.zoho:lens:2.4.2')
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.2'
-    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.2'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.32"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:1.6.20"
+    testImplementation 'junit:junit:4.13.2'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
+    implementation ('com.zoho:lens:2.4.3')
+//    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.2'
+//    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.2'
     // Optional, if you use support library fragments:
 //    debugImplementation 'com.squareup.leakcanary:leakcanary-support-fragment:1.6.2'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'

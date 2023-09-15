@@ -1,27 +1,54 @@
 package com.zoho.lens.demo
 
+import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProviders
 import com.zoho.lens.AudioDevice
 import com.zoho.lens.LensSDK
 import com.zoho.lens.UserInfo
+import com.zoho.lens.chatLet.ChatLetState
 import com.zoho.lens.demo.databinding.ActivityLensBinding
 import com.zoho.lens.handler.QRHandler
-import kotlinx.android.synthetic.main.activity_lens.*
+import kotlinx.android.synthetic.main.activity_lens.chat_button
+import kotlinx.android.synthetic.main.activity_lens.clear_all_annotation
+import kotlinx.android.synthetic.main.activity_lens.close
+import kotlinx.android.synthetic.main.activity_lens.green
+import kotlinx.android.synthetic.main.activity_lens.mute_unmute_self
+import kotlinx.android.synthetic.main.activity_lens.ocr_button
+import kotlinx.android.synthetic.main.activity_lens.orange
+import kotlinx.android.synthetic.main.activity_lens.qr_button
+import kotlinx.android.synthetic.main.activity_lens.red
+import kotlinx.android.synthetic.main.activity_lens.share_camera
+import kotlinx.android.synthetic.main.activity_lens.speaker
+import kotlinx.android.synthetic.main.activity_lens.stream_view
+import kotlinx.android.synthetic.main.activity_lens.swap_camera
+import kotlinx.android.synthetic.main.activity_lens.undo_annotation
+import kotlinx.android.synthetic.main.activity_lens.video
+import kotlinx.android.synthetic.main.activity_lens.yellow
+import kotlinx.android.synthetic.main.activity_lens.zoom
+import kotlinx.android.synthetic.main.activity_lens.zoom_seekbar
 
 
 class LensSample : AppCompatActivity() {
     private var sessionKey: String? = null
     private var mailId: String? = ""
     var changedMuteSelf: Boolean = false
+    val chatFragment = ChatFragment.newInstance()
+    val chatLetState = MutableLiveData<ChatLetState>()
+    private lateinit var liveTextResultFragment: LiveTextResultFragment
+    var isFreezeVideo = false
+
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return super.onSupportNavigateUp()
@@ -32,7 +59,7 @@ class LensSample : AppCompatActivity() {
 
         LensSDK.onCreate(this)
         val viewDataBinding = DataBindingUtil.setContentView<ActivityLensBinding>(this, R.layout.activity_lens)
-        val result = viewDataBinding.setVariable(BR.viewmodel, ViewModelProviders.of(this).get(LensViewModel::class.java))
+        val result = viewDataBinding.setVariable(BR.viewmodel, ViewModelProviders.of(this)[LensViewModel::class.java])
         if (!result) {
             throw RuntimeException("ViewModel variable not set. Check the types")
         }
@@ -167,6 +194,57 @@ class LensSample : AppCompatActivity() {
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) { }
         })
+
+        chat_button.setOnClickListener {
+            if (!chatFragment.isAdded) {
+                chatFragment.show(supportFragmentManager, "Chat")
+            }
+        }
+
+        chatLetState.observe(this) { state ->
+            state?.let {
+                when (it) {
+                    ChatLetState.SUCCESS -> {
+                        chat_button.visibility = View.VISIBLE
+                    }
+                    ChatLetState.ERROR, ChatLetState.LOADING -> {
+                        chat_button.visibility = View.GONE
+                    }
+                }
+            }
+        }
+    }
+
+    fun onLiveTextScanCompleted(resultText: String) {
+        val chatMessage = resultText.trim()
+        val args = Bundle().apply { putString("chatMessage", chatMessage) }
+        liveTextResultFragment = LiveTextResultFragment.newInstance(ScanType.OCR)
+        liveTextResultFragment.arguments = args
+        if (!liveTextResultFragment.isAdded) {
+            liveTextResultFragment.show(this.supportFragmentManager, "OCR Result")
+        }
+    }
+
+    fun onQRScanCompleted(resultText: String) {
+        val chatMessage = resultText.trim()
+        val args = Bundle().apply { putString("chatMessage", chatMessage) }
+        liveTextResultFragment = LiveTextResultFragment.newInstance(ScanType.QR)
+        liveTextResultFragment.arguments = args
+        if (!liveTextResultFragment.isAdded) {
+            liveTextResultFragment.show(this.supportFragmentManager, "QR Result")
+        }
+    }
+
+    fun onChatLetReverted(status:Boolean) {
+        if (status) {
+            if (chatFragment.isAdded) {
+                chatFragment.dismiss()
+                Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show()
+            }
+            chat_button.visibility = View.GONE
+        } else {
+            chat_button.visibility = View.VISIBLE
+        }
     }
 
     override fun onPause() {
@@ -199,6 +277,28 @@ class LensSample : AppCompatActivity() {
         intentMain.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intentMain)
         finish()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        val uris = mutableListOf<Uri>()
+        if (requestCode == 100 && resultCode == Activity.RESULT_OK){
+            val clipData = data?.clipData
+            if (clipData != null) {
+                for (i in 0 until clipData.itemCount) {
+                    val item = clipData.getItemAt(i)
+                    uris.add(item.uri)
+                }
+            } else {
+                val uri = data?.data
+                if (uri != null) {
+                    uris.add(uri)
+                }
+            }
+            LensSDK.attachFileCallBackForChat(uris.toTypedArray())
+        } else {
+            LensSDK.attachFileCallBackForChat(null)
+        }
     }
 }
 

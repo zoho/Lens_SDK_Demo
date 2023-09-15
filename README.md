@@ -3,4 +3,4 @@ The Zoho Lens Software Development Kit (SDK) for Android will help you build a c
 
 The software development kit is a fully swiftified project.
 
-Go through the [documentation](https://prezoho.zohocorp.com/lens/resources/mobilesdk/android/index.html) to get started.
+Go through the [documentation](https://zoho.com/lens/resources/mobilesdk/android/index.html) to get started.

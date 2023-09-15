@@ -9,8 +9,32 @@ import android.view.View
 import android.widget.Toast
 import com.example.arcore_assistrtc.enums.TrackingFailureReason
 import com.example.arcore_assistrtc.enums.TrackingState
-import com.zoho.lens.*
-import kotlinx.android.synthetic.main.activity_lens.*
+import com.zoho.lens.ArAnnotationObject
+import com.zoho.lens.AudioDevice
+import com.zoho.lens.ChatModel
+import com.zoho.lens.ErrorType
+import com.zoho.lens.FlashSupportStatus
+import com.zoho.lens.ISessionCallback
+import com.zoho.lens.LensSDK
+import com.zoho.lens.LensToast
+import com.zoho.lens.LensType
+import com.zoho.lens.OCRState
+import com.zoho.lens.OCRStateModel
+import com.zoho.lens.ParticipantStatus
+import com.zoho.lens.StreamingType
+import com.zoho.lens.chatLet.ChatLetState
+import kotlinx.android.synthetic.main.activity_lens.chat_button
+import kotlinx.android.synthetic.main.activity_lens.clear_all_annotation
+import kotlinx.android.synthetic.main.activity_lens.flash_light
+import kotlinx.android.synthetic.main.activity_lens.mute_unmute_self
+import kotlinx.android.synthetic.main.activity_lens.ocr_button
+import kotlinx.android.synthetic.main.activity_lens.qr_button
+import kotlinx.android.synthetic.main.activity_lens.share_camera
+import kotlinx.android.synthetic.main.activity_lens.swap_camera
+import kotlinx.android.synthetic.main.activity_lens.undo_annotation
+import kotlinx.android.synthetic.main.activity_lens.video
+import kotlinx.android.synthetic.main.activity_lens.zoom
+import kotlinx.android.synthetic.main.activity_lens.zoom_seekbar
 
 class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
     override fun sessionConnectionState(state: LensType, error: ErrorType?, message: String) {
@@ -112,12 +136,6 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
             LensType.ICE_CANDIDATES_LOCAL_CONNECTION_FAILURE -> {}
             LensType.ICE_CANDIDATES_REMOTE_CONNECTION_FAILURE -> {}
         }
-
-        if (message.isNotEmpty()) {
-            Handler(Looper.getMainLooper()).post {
-//                Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
-            }
-        }
     }
 
     /**
@@ -127,7 +145,7 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
     }
 
     override fun clientAlreadyActiveInSession() {
-        TODO("Not yet implemented")
+
     }
 
     override fun onLensScreenShotTaken() {
@@ -144,6 +162,12 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         activity.runOnUiThread {
             Toast.makeText(activity, "Your microphone is being used by another app. Close any apps that are using the microphone and try again.", Toast.LENGTH_LONG).show()
             activity.finish()
+        }
+    }
+
+    override fun onNotifyNewChatMessage(rawMessage: String, senderName: String) {
+        activity.runOnUiThread {
+            Toast.makeText(activity, "$senderName : $rawMessage", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -211,10 +235,117 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
      * Show toast message to the users, Toast type
      */
     override fun showToast(type: LensToast, displayName: String?) {
-        activity.runOnUiThread {
-            displayName?.let {
-                if (type != LensToast.ANCHOR_PLACED &&  it != "") {
-                    Toast.makeText(activity, displayName, Toast.LENGTH_SHORT).show()
+        when (type) {
+            LensToast.TECHNICIAN_FROZEN_VIDEO, LensToast.SECONDARY_TECH_FROZEN_VIDEO, LensToast.CUSTOMER_FROZEN_VIDEO -> {
+                displayName?.let {
+                    activity.video.isChecked = true
+                    if (it != "") {
+                        Toast.makeText(activity, "$displayName frozen video streaming", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            LensToast.TECHNICIAN_UNFROZEN_VIDEO, LensToast.SECONDARY_TECH_UNFROZEN_VIDEO, LensToast.CUSTOMER_UNFROZEN_VIDEO -> {
+                activity.video.isChecked = false
+                displayName?.let {
+                    if (it != "") {
+                        Toast.makeText(activity, "$displayName unfrozen video streaming", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
+            LensToast.TECHNICIAN_FROZEN_SNAPSHOT,LensToast.SECONDARY_TECHNICIAN_FROZEN_SNAPSHOT -> {
+                displayName?.let {
+                    if (it != "") {
+                        Toast.makeText(activity, "$displayName frozen snapshot", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            LensToast.TECHNICIAN_UN_FROZEN_SNAPSHOT, LensToast.SECONDARY_TECHNICIAN_UN_FROZEN_SNAPSHOT -> {
+                displayName?.let {
+                    if (it != "") {
+                        Toast.makeText(activity, "$displayName unfrozen snapshot", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
+            LensToast.SECONDARY_TECH_CANNOT_FREEZE_UNFREEZE_VIDEO -> {
+                displayName?.let {
+                    if (it != "") {
+                        Toast.makeText(activity, "$displayName cannot freeze/unfreeze video streaming", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
+            LensToast.JOINED_PARTICIPANT -> {
+                displayName?.let {
+                    if (it != "") {
+                        Toast.makeText(activity, "$displayName joined in the session", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            LensToast.LEFT_PARTICIPANT -> {
+                displayName?.let {
+                    if (it != "") {
+                        Toast.makeText(activity, "$displayName left in the session", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
+            LensToast.ANCHOR_PLACED -> {}
+            LensToast.ANCHOR_SELECTED -> {}
+            LensToast.ANCHOR_DESELECTED -> {}
+            LensToast.ANCHOR_PLACE_FAILED -> {}
+
+            LensToast.CAMERA_STREAM_CHANGED -> {
+                displayName?.let {
+                    if (it != "") {
+                        Toast.makeText(activity, "$displayName is currently streaming", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            LensToast.CAMERA_STREAM_REMOVED -> {
+                displayName?.let {
+                    if (it != "") {
+                        Toast.makeText(activity, "$displayName is removed streaming", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            LensToast.CAMERA_STREAM_REQUEST_SOMEONE_WAITING_ALREADY -> {
+                displayName?.let {
+                    if (it != "") {
+                        Toast.makeText(activity, "$displayName is waiting to streaming", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
+            LensToast.CAMERA_STREAM_REQUEST_RECEIVED -> {}
+            LensToast.CAMERA_STREAM_REQUEST_APPROVED -> {
+                displayName?.let {
+                    if (it != "") {
+                        Toast.makeText(activity, "$displayName streaming request approved", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            LensToast.CAMERA_STREAM_REQUEST_DENIED -> {
+                displayName?.let {
+                    if (it != "") {
+                        Toast.makeText(activity, "$displayName streaming request denied", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
+            LensToast.ZFS_SNAPSHOT_DOWNLOADED -> {
+                displayName?.let {
+                    if (it != "") {
+                        Toast.makeText(activity, "$displayName downloaed snapshot for freeze", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            LensToast.ZFS_SNAPSHOT_DOWNLOAD_FAILED -> {
+                displayName?.let {
+                    if (it != "") {
+                        Toast.makeText(activity, "$displayName downloading failed snapshot for freeze", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }
@@ -223,15 +354,10 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
     override fun showArTrackingListenerToast(trackingState: TrackingState, trackingFailureReason: TrackingFailureReason) {
         if ((trackingState == TrackingState.PAUSED && trackingFailureReason != TrackingFailureReason.NONE ) || trackingState == TrackingState.STOPPED) {
             activity.runOnUiThread {
-                Toast.makeText(
-                    activity,
-                    "${trackingState.name}:${trackingFailureReason.name}",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(activity, "${trackingState.name}:${trackingFailureReason.name}", Toast.LENGTH_SHORT).show()
             }
         }
     }
-
 
     /**
      * Callback used to perform any operation whenever the audio device gets changed.
@@ -241,6 +367,11 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         * List down the devices and switch the audio mode
         */
         LensSDK.switchAudioMode(selectedAudioDevice)
+    }
+
+    override fun chatLetState(currentStatus: ChatLetState) {
+        activity.chatFragment.chatLetState.postValue(currentStatus)
+        activity.chatLetState.postValue(currentStatus)
     }
 
     /**
@@ -302,6 +433,15 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
 
                     activity.share_camera.text = "Video Off"
                     activity.share_camera.visibility = View.VISIBLE
+                    activity.flash_light.visibility = View.GONE
+
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        if (LensSDK.getChatLetEnabled()) {
+                            activity.chat_button.visibility = View.VISIBLE
+                        } else {
+                            activity.chat_button.visibility = View.GONE
+                        }
+                    }, 5000)
                 }
                 StreamingType.VIDEO_DOWNSTREAM -> {
                     activity.swap_camera.visibility = View.VISIBLE
@@ -318,6 +458,19 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
 
                     activity.share_camera.text = "Video On"
                     activity.share_camera.visibility = View.VISIBLE
+
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        if (LensSDK.getChatLetEnabled()) {
+                            activity.chat_button.visibility = View.VISIBLE
+                        } else {
+                            activity.chat_button.visibility = View.GONE
+                        }
+                        if (LensSDK.getFlashSupportEnabled()) {
+                            activity.flash_light.visibility = View.VISIBLE
+                        } else {
+                            activity.flash_light.visibility = View.GONE
+                        }
+                    }, 5000)
                 }
                 StreamingType.NO_ONE_IS_STREAMING -> {
                     activity.swap_camera.visibility = View.GONE
@@ -328,9 +481,18 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                     activity.zoom_seekbar.visibility = View.GONE
                     activity.undo_annotation.visibility = View.GONE
                     activity.clear_all_annotation.visibility = View.GONE
+                    activity.flash_light.visibility = View.GONE
 
                     activity.share_camera.text = "Video On"
                     activity.share_camera.visibility = View.VISIBLE
+
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        if (LensSDK.getChatLetEnabled()) {
+                            activity.chat_button.visibility = View.VISIBLE
+                        } else {
+                            activity.chat_button.visibility = View.GONE
+                        }
+                    }, 5000)
                 }
             }
         }
@@ -340,6 +502,44 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
 
     }
 
+    override fun onFlashLightOff(flashSupportStatus: FlashSupportStatus, displayName: String?) {
+        when (flashSupportStatus) {
+            FlashSupportStatus.SUCCESS -> {
+                activity.flash_light.isChecked = false
+                activity.flash_light.text = "Flash On"
+                activity.runOnUiThread {
+                    Toast.makeText(activity, "$displayName has turned off Flashlight", Toast.LENGTH_LONG).show()
+                }
+            }
+            FlashSupportStatus.FAILED -> {
+                activity.flash_light.isChecked = true
+                activity.flash_light.text = "Flash Off"
+                activity.runOnUiThread {
+                    Toast.makeText(activity, "Unable to turn off Flashlight. Try again.", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
+    override fun onFlashLightOn(flashSupportStatus: FlashSupportStatus, displayName: String?) {
+        when (flashSupportStatus) {
+            FlashSupportStatus.SUCCESS -> {
+                activity.flash_light.isChecked = true
+                activity.flash_light.text = "Flash Off"
+                activity.runOnUiThread {
+                    Toast.makeText(activity, "$displayName has turned on Flashlight", Toast.LENGTH_LONG).show()
+                }
+            }
+            FlashSupportStatus.FAILED -> {
+                activity.flash_light.isChecked = false
+                activity.flash_light.text = "Flash On"
+                activity.runOnUiThread {
+                    Toast.makeText(activity, "Unable to turn on Flashlight. Try again.", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
     override fun onCameraSwapDone(isFrontCamera: Boolean) {
         activity.runOnUiThread {
             activity.zoom.isChecked = false
@@ -347,6 +547,10 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
 
             LensSDK.setZoomPercentage(0f)
         }
+    }
+
+    override fun onChatLetReverted(status: Boolean) {
+        activity.onChatLetReverted(status)
     }
 
     override fun onOCRStateChanged(ocrStateModel: OCRStateModel) {
@@ -359,6 +563,7 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
             OCRState.COMPLETED -> {
                 activity.runOnUiThread {
                     Toast.makeText(activity, ocrStateModel.ocrText ?: "", Toast.LENGTH_SHORT).show()
+                    activity.onLiveTextScanCompleted(ocrStateModel.ocrText ?: "")
                 }
             }
             OCRState.ERROR -> {
@@ -372,6 +577,7 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
     override fun onQRSuccess(qrText: String) {
         activity.runOnUiThread {
             Toast.makeText(activity, qrText, Toast.LENGTH_SHORT).show()
+            activity.onQRScanCompleted(qrText)
         }
     }
 

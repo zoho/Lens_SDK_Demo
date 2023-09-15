@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/main_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:background="@color/white">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/close_chat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:text="Close"
+                android:textColor="#008B00"
+                android:textAllCaps="false"
+                android:textSize="18sp" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/refresh_chat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="18dp"
+                android:layout_marginEnd="16dp"
+                android:text="Refresh"
+                android:textColor="#008B00"
+                android:textSize="16sp"
+                android:textAllCaps="false"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <View
+                android:id="@+id/separator"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@+id/close_chat"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="0dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="0dp"
+                android:background="#1E000000"
+                app:layout_constraintVertical_bias="0" />
+
+            <RelativeLayout
+                android:id="@+id/retry_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/separator"
+                android:background="@color/white">
+
+                <TextView
+                    android:id="@+id/retry_button"
+                    android:textColor="@color/black"
+                    android:layout_width="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_height="wrap_content"
+                    android:text="Retry" />
+            </RelativeLayout>
+
+
+            <RelativeLayout
+                android:id="@+id/lottieImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/separator"
+                android:background="@color/white">
+
+                <com.airbnb.lottie.LottieAnimationView
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:layout_centerInParent="true"
+                    android:layout_gravity="center"
+                    app:lottie_autoPlay="true"
+                    app:lottie_fileName="loader.json"
+                    app:lottie_loop="true" />
+            </RelativeLayout>
+
+            <WebView
+                android:id="@+id/chat_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/separator"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
+                android:nestedScrollingEnabled="true"
+                android:background="@color/white" />
+
+        </RelativeLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</layout>
+
+    <!-- $Id$ -->

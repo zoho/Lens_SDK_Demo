@@ -29,11 +29,13 @@
 
         <activity
             android:name=".LensSample"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden|navigation" />
+            android:exported="true"
+            android:configChanges="uiMode|screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden|navigation" />
 
         <receiver
             android:name=".NetworkListenerService"
-            android:label="NetworkConnection">
+            android:label="NetworkConnection"
+            android:exported="true">
             <intent-filter>
                 <action
                     android:name="android.net.conn.CONNECTIVITY_CHANGE"

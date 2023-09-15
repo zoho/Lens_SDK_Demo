@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
 
@@ -67,6 +66,14 @@
                         android:textOn="Unfreeze Video" />
 
                     <Button
+                        android:id="@+id/chat_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="Chat"
+                        android:visibility="gone"/>
+
+                    <Button
                         android:id="@+id/ocr_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -80,6 +87,15 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:text="Scan"
+                        android:visibility="visible"/>
+
+                    <ToggleButton
+                        android:id="@+id/flash_light"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:textOff="Flash On"
+                        android:textOn="Flash Off"
                         android:visibility="visible"/>
 
                     <ToggleButton
