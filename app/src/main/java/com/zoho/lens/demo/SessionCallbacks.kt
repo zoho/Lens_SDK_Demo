@@ -238,6 +238,7 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         when (type) {
             LensToast.TECHNICIAN_FROZEN_VIDEO, LensToast.SECONDARY_TECH_FROZEN_VIDEO, LensToast.CUSTOMER_FROZEN_VIDEO -> {
                 displayName?.let {
+                    activity.isMuteVideo = true
                     activity.video.isChecked = true
                     if (it != "") {
                         Toast.makeText(activity, "$displayName frozen video streaming", Toast.LENGTH_SHORT).show()
@@ -245,6 +246,7 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                 }
             }
             LensToast.TECHNICIAN_UNFROZEN_VIDEO, LensToast.SECONDARY_TECH_UNFROZEN_VIDEO, LensToast.CUSTOMER_UNFROZEN_VIDEO -> {
+                activity.isMuteVideo = false
                 activity.video.isChecked = false
                 displayName?.let {
                     if (it != "") {

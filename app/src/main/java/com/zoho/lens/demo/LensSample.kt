@@ -47,7 +47,7 @@ class LensSample : AppCompatActivity() {
     val chatFragment = ChatFragment.newInstance()
     val chatLetState = MutableLiveData<ChatLetState>()
     private lateinit var liveTextResultFragment: LiveTextResultFragment
-    var isFreezeVideo = false
+    var isMuteVideo = false
 
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
@@ -144,8 +144,9 @@ class LensSample : AppCompatActivity() {
             }
         }
 
-        video.setOnCheckedChangeListener { _, isChecked ->
-            LensSDK.muteVideo(isChecked)
+        video.setOnClickListener {
+            isMuteVideo = !isMuteVideo
+            LensSDK.muteVideo(isMuteVideo)
         }
 
         ocr_button.setOnClickListener {
