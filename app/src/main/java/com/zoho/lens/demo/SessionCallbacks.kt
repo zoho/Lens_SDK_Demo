@@ -148,6 +148,10 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
 
     }
 
+    override fun customerAlreadyActiveInSession() {
+
+    }
+
     override fun onLensScreenShotTaken() {
         activity.runOnUiThread {
             Toast.makeText(activity, "Screenshot taken", Toast.LENGTH_SHORT).show()
@@ -433,6 +437,7 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                     activity.zoom.isChecked = false
                     activity.zoom_seekbar.visibility = View.GONE
 
+                    activity.share_camera.isChecked = true
                     activity.share_camera.text = "Video Off"
                     activity.share_camera.visibility = View.VISIBLE
                     activity.flash_light.visibility = View.GONE
@@ -458,6 +463,7 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                     activity.zoom.visibility = View.GONE
                     activity.zoom_seekbar.visibility = View.GONE
 
+                    activity.share_camera.isChecked = false
                     activity.share_camera.text = "Video On"
                     activity.share_camera.visibility = View.VISIBLE
 
@@ -485,6 +491,7 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                     activity.clear_all_annotation.visibility = View.GONE
                     activity.flash_light.visibility = View.GONE
 
+                    activity.share_camera.isChecked = false
                     activity.share_camera.text = "Video On"
                     activity.share_camera.visibility = View.VISIBLE
 
@@ -544,9 +551,20 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
 
     override fun onCameraSwapDone(isFrontCamera: Boolean) {
         activity.runOnUiThread {
+            if (LensSDK.isARMode() && !isFrontCamera) {
+                activity.zoom.visibility = View.VISIBLE
+
+                activity.clear_all_annotation.visibility = View.VISIBLE
+                activity.undo_annotation.visibility = View.VISIBLE
+            } else {
+                activity.zoom.visibility = View.GONE
+
+                activity.clear_all_annotation.visibility = View.GONE
+                activity.undo_annotation.visibility = View.GONE
+            }
+
             activity.zoom.isChecked = false
             activity.zoom_seekbar.visibility = View.GONE
-
             LensSDK.setZoomPercentage(0f)
         }
     }

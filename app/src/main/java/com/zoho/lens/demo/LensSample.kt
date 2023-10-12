@@ -157,8 +157,8 @@ class LensSample : AppCompatActivity() {
             LensSDK.requestQR(isSilent = false, shouldContinuouslyRetry = QRHandler.RetryMode.RETRY_CONTINOUSLY)
         }
 
-        share_camera.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
+        share_camera.setOnClickListener {
+            if (share_camera.isChecked) {
                 LensSDK.shareCameraRequest()
             } else {
                 LensSDK.stopCameraRequest()
