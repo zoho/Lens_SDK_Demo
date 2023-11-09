@@ -13,6 +13,7 @@ import com.zoho.lens.ArAnnotationObject
 import com.zoho.lens.AudioDevice
 import com.zoho.lens.ChatModel
 import com.zoho.lens.ErrorType
+import com.zoho.lens.FlashStatus
 import com.zoho.lens.FlashSupportStatus
 import com.zoho.lens.ISessionCallback
 import com.zoho.lens.LensSDK
@@ -29,6 +30,7 @@ import kotlinx.android.synthetic.main.activity_lens.flash_light
 import kotlinx.android.synthetic.main.activity_lens.mute_unmute_self
 import kotlinx.android.synthetic.main.activity_lens.ocr_button
 import kotlinx.android.synthetic.main.activity_lens.qr_button
+import kotlinx.android.synthetic.main.activity_lens.resolution
 import kotlinx.android.synthetic.main.activity_lens.share_camera
 import kotlinx.android.synthetic.main.activity_lens.swap_camera
 import kotlinx.android.synthetic.main.activity_lens.undo_annotation
@@ -142,36 +144,32 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
      * Callback used to handle the received messages.
      */
     override fun chatMessage(message: ChatModel) {
-    }
-
-    override fun clientAlreadyActiveInSession() {
 
     }
 
+    /**
+     * Callback used to handle when customer already active in another session.
+     */
     override fun customerAlreadyActiveInSession() {
 
     }
 
+    /**
+     * Callback used to handle when snapshot taken by technician
+     */
     override fun onLensScreenShotTaken() {
         activity.runOnUiThread {
-            Toast.makeText(activity, "Screenshot taken", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, "Snapshot taken by technician", Toast.LENGTH_SHORT).show()
         }
     }
 
     /**
      * Callback used to perform before starting session microphone is available to use.
      */
-
     override fun onMicroPhoneUsingByOtherApps() {
         activity.runOnUiThread {
             Toast.makeText(activity, "Your microphone is being used by another app. Close any apps that are using the microphone and try again.", Toast.LENGTH_LONG).show()
             activity.finish()
-        }
-    }
-
-    override fun onNotifyNewChatMessage(rawMessage: String, senderName: String) {
-        activity.runOnUiThread {
-            Toast.makeText(activity, "$senderName : $rawMessage", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -180,6 +178,13 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
      */
     override fun log(tag: String, message: String) {
         Log.d(tag, message)
+    }
+
+    /**
+     * Callback used to handle the annotation count updates
+     */
+    override fun onAnnotationsCountUpdated(annotationCount: Int?) {
+
     }
 
     /**
@@ -219,15 +224,6 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         return activity
     }
 
-    /**
-     * Callback used to handle the video freeze state
-     */
-
-    /**
-     * Session is already active in another location so we can't open.
-     */
-    override fun openedInDifferentLocation() {
-    }
 
     /**
      * To update the list of technicians currently connected in the session along with the state.
@@ -375,6 +371,9 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         LensSDK.switchAudioMode(selectedAudioDevice)
     }
 
+    /**
+     * Callback used to handle the chatlet state
+     */
     override fun chatLetState(currentStatus: ChatLetState) {
         activity.chatFragment.chatLetState.postValue(currentStatus)
         activity.chatLetState.postValue(currentStatus)
@@ -404,18 +403,6 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
     }
 
     /**
-     * Callback used to handle the annotation count updates
-     */
-    override fun annotationsUpdated(annotationCount: Int?) {
-    }
-
-    /**
-     * Callback used to handle the selected/ Unselected annotation with annotation Id
-     */
-    override fun annotationSelection(isSelected: Boolean, id: String?) {
-    }
-
-    /**
      * Callback used to perform any operation whenever streaming type is changing.
      */
     override fun showStreamingType(type: StreamingType, displayName: String?) {
@@ -430,6 +417,11 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                         activity.zoom.visibility = View.VISIBLE
                         activity.undo_annotation.visibility = View.VISIBLE
                         activity.clear_all_annotation.visibility = View.VISIBLE
+
+                        activity.resolution.visibility = View.VISIBLE
+
+                        LensSDK.setResolution(false)
+                        activity.resolution.text = "Non HD"
                     }
 
                     activity.video.visibility = View.VISIBLE
@@ -458,6 +450,7 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                     activity.video.visibility = View.GONE
                     activity.undo_annotation.visibility = View.GONE
                     activity.clear_all_annotation.visibility = View.GONE
+                    activity.resolution.visibility = View.GONE
 
                     activity.zoom.isChecked = false
                     activity.zoom.visibility = View.GONE
@@ -490,6 +483,7 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                     activity.undo_annotation.visibility = View.GONE
                     activity.clear_all_annotation.visibility = View.GONE
                     activity.flash_light.visibility = View.GONE
+                    activity.resolution.visibility = View.GONE
 
                     activity.share_camera.isChecked = false
                     activity.share_camera.text = "Video On"
@@ -507,48 +501,65 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         }
     }
 
+    /**
+     * Callback used to handle the fpsUpdate
+     */
     override fun onFPSUpdate(averageFPS: Int, fifteenthSecondFPS: Int) {
 
     }
 
-    override fun onFlashLightOff(flashSupportStatus: FlashSupportStatus, displayName: String?) {
-        when (flashSupportStatus) {
-            FlashSupportStatus.SUCCESS -> {
-                activity.flash_light.isChecked = false
-                activity.flash_light.text = "Flash On"
-                activity.runOnUiThread {
-                    Toast.makeText(activity, "$displayName has turned off Flashlight", Toast.LENGTH_LONG).show()
+    /**
+     * Callback used to handle the flash ligh on/off state
+     */
+    override fun onFlashLightOnOff(flashStatus: FlashStatus, flashSupportStatus: FlashSupportStatus, displayName: String?) {
+        when (flashStatus) {
+            FlashStatus.ON -> {
+                when (flashSupportStatus) {
+                    FlashSupportStatus.SUCCESS -> {
+                        activity.runOnUiThread {
+                            activity.flash_light.isChecked = true
+                            activity.flash_light.text = "Flash Off"
+                            activity.flashStatus = true
+                            Toast.makeText(activity, "$displayName has turned on Flashlight", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                    FlashSupportStatus.FAILED -> {
+                        activity.runOnUiThread {
+                            activity.flash_light.isChecked = false
+                            activity.flash_light.text = "Flash On"
+                            activity.flashStatus = false
+                            Toast.makeText(activity, "Unable to turn on Flashlight. Try again.", Toast.LENGTH_LONG).show()
+                        }
+                    }
                 }
             }
-            FlashSupportStatus.FAILED -> {
-                activity.flash_light.isChecked = true
-                activity.flash_light.text = "Flash Off"
-                activity.runOnUiThread {
-                    Toast.makeText(activity, "Unable to turn off Flashlight. Try again.", Toast.LENGTH_LONG).show()
+            FlashStatus.OFF -> {
+                when (flashSupportStatus) {
+                    FlashSupportStatus.SUCCESS -> {
+                        activity.runOnUiThread {
+                            activity.flash_light.isChecked = false
+                            activity.flash_light.text = "Flash On"
+                            activity.flashStatus = false
+                            Toast.makeText(activity, "$displayName has turned off Flashlight", Toast.LENGTH_LONG).show()
+                        }
+
+                    }
+                    FlashSupportStatus.FAILED -> {
+                        activity.runOnUiThread {
+                            activity.flash_light.isChecked = true
+                            activity.flash_light.text = "Flash Off"
+                            activity.flashStatus = false
+                            Toast.makeText(activity, "Unable to turn off Flashlight. Try again.", Toast.LENGTH_LONG).show()
+                        }
+                    }
                 }
             }
         }
     }
 
-    override fun onFlashLightOn(flashSupportStatus: FlashSupportStatus, displayName: String?) {
-        when (flashSupportStatus) {
-            FlashSupportStatus.SUCCESS -> {
-                activity.flash_light.isChecked = true
-                activity.flash_light.text = "Flash Off"
-                activity.runOnUiThread {
-                    Toast.makeText(activity, "$displayName has turned on Flashlight", Toast.LENGTH_LONG).show()
-                }
-            }
-            FlashSupportStatus.FAILED -> {
-                activity.flash_light.isChecked = false
-                activity.flash_light.text = "Flash On"
-                activity.runOnUiThread {
-                    Toast.makeText(activity, "Unable to turn on Flashlight. Try again.", Toast.LENGTH_LONG).show()
-                }
-            }
-        }
-    }
-
+    /**
+     * Callback used to handle swap camera
+     */
     override fun onCameraSwapDone(isFrontCamera: Boolean) {
         activity.runOnUiThread {
             if (LensSDK.isARMode() && !isFrontCamera) {
@@ -569,10 +580,16 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         }
     }
 
+    /**
+     * Callback used to handle if chatlet reverted
+     */
     override fun onChatLetReverted(status: Boolean) {
         activity.onChatLetReverted(status)
     }
 
+    /**
+     * Callback used to handle Live text scan states
+     */
     override fun onOCRStateChanged(ocrStateModel: OCRStateModel) {
         when (ocrStateModel.ocrState) {
             OCRState.STARTED -> {
@@ -582,7 +599,6 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
             }
             OCRState.COMPLETED -> {
                 activity.runOnUiThread {
-                    Toast.makeText(activity, ocrStateModel.ocrText ?: "", Toast.LENGTH_SHORT).show()
                     activity.onLiveTextScanCompleted(ocrStateModel.ocrText ?: "")
                 }
             }
@@ -594,13 +610,18 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         }
     }
 
+    /**
+     * Callback used to handle QR/Barcode scan success state
+     */
     override fun onQRSuccess(qrText: String) {
         activity.runOnUiThread {
-            Toast.makeText(activity, qrText, Toast.LENGTH_SHORT).show()
             activity.onQRScanCompleted(qrText)
         }
     }
 
+    /**
+     * Callback used to handle QR/Barcode failure success state
+     */
     override fun onQRFailure(errorMessage: String, willRetry: Boolean) {
         activity.runOnUiThread {
             if (!willRetry) {

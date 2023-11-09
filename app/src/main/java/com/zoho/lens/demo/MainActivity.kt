@@ -5,9 +5,11 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.widget.EditText
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -18,7 +20,17 @@ class MainActivity : AppCompatActivity() {
     private var isAR: Boolean = false
     var TAG = MainActivity::class.java.canonicalName as String
     private lateinit var dialog: AlertDialog
-    var DEFAULT_SESSION_KEY = "371007523"
+    private var DEFAULT_SESSION_KEY = "371007523"
+
+    private val cameraPermissions = Manifest.permission.CAMERA
+    private val recAudioPermissions = Manifest.permission.RECORD_AUDIO
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    val postNotifications = Manifest.permission.POST_NOTIFICATIONS
+    @RequiresApi(Build.VERSION_CODES.S)
+    val bluetoothConnect = Manifest.permission.BLUETOOTH_CONNECT
+
+    private var cameraPermission = false
+    private var micPermission = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -31,52 +43,62 @@ class MainActivity : AppCompatActivity() {
         }
 
         ok_button.setOnClickListener {
-            val intent = Intent(this@MainActivity, LensSample::class.java)
-            intent.putExtra("sessionKey", key_edittext.text.toString())
-            intent.putExtra("baseUrl", baseurl_edittext.text.toString())
-            intent.putExtra("isAR", isAR)
-            startActivity(intent)
+            if (cameraPermission && micPermission) {
+                val intent = Intent(this@MainActivity, LensSample::class.java)
+                intent.putExtra("sessionKey", key_edittext.text.toString())
+                intent.putExtra("baseUrl", baseurl_edittext.text.toString())
+                intent.putExtra("isAR", isAR)
+                startActivity(intent) 
+            } else {
+                Toast.makeText(this, "Please grant camera and microphone permission", Toast.LENGTH_SHORT).show()
+            }
         }
         
-        checkPermission(arrayListOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO), CAMERA_PERMISSION_CODE)
-    }
-
-    fun checkPermission(permissions: ArrayList<String>, requestCode: Int) {
-        // Checking if permission is not granted
-        if (permissions.any { permission -> ContextCompat.checkSelfPermission(this@MainActivity, permission) == PackageManager.PERMISSION_DENIED }) {
-            ActivityCompat.requestPermissions(this@MainActivity, permissions.toTypedArray(), requestCode)
+        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            arrayOf(cameraPermissions, recAudioPermissions, postNotifications, bluetoothConnect)
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            arrayOf(cameraPermissions, recAudioPermissions, bluetoothConnect)
         } else {
-            Toast.makeText(this@MainActivity, "Permissions already granted", Toast.LENGTH_SHORT).show()
+            arrayOf(cameraPermissions, recAudioPermissions)
+        }
+
+        val permissionsToRequest = permissions.filter {
+            if (it == cameraPermissions && ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED) {
+                cameraPermission = true
+            }
+            if (it == recAudioPermissions && ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED) {
+                micPermission = true
+            }
+
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+        if (permissionsToRequest.isNotEmpty()) {
+            ActivityCompat.requestPermissions(this, permissionsToRequest.toTypedArray(), 100)
         }
     }
-
-    private val CAMERA_PERMISSION_CODE = 100
-
+    
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == CAMERA_PERMISSION_CODE) {
-            // Checking whether user granted the permission or not.
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Showing the toast message
-                Toast.makeText(this@MainActivity, "Permissions Granted", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this@MainActivity, "Permissions Denied", Toast.LENGTH_SHORT).show()
+        if (requestCode == 100) {
+            permissions.forEachIndexed { index, s ->
+                if (grantResults[index] == PackageManager.PERMISSION_GRANTED) {
+                    if (s == Manifest.permission.CAMERA) {
+                        cameraPermission = true
+                    }
+                    if (s == Manifest.permission.RECORD_AUDIO) {
+                        micPermission = true
+                    }
+                }
+                if (grantResults[index] != PackageManager.PERMISSION_GRANTED) {
+                    if (s == Manifest.permission.CAMERA) {
+                        cameraPermission = false
+                    }
+                    if (s == Manifest.permission.RECORD_AUDIO) {
+                        micPermission = false
+                    }
+                    Toast.makeText(this, "$s Permission Denied", Toast.LENGTH_SHORT).show()
+                }
             }
-        }
-    }
-
-    private fun askForPermission(permission: String, requestCode: Int) {
-        if (ContextCompat.checkSelfPermission(this@MainActivity, permission) != PackageManager.PERMISSION_GRANTED) {
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this@MainActivity, permission)) {
-                //This is called if user has denied the permission before
-                //In this case I am just asking the permission again
-                ActivityCompat.requestPermissions(this@MainActivity, arrayOf(permission), requestCode)
-            } else {
-                ActivityCompat.requestPermissions(this@MainActivity, arrayOf(permission), requestCode)
-            }
-        } else {
-            Toast.makeText(this, "$permission is already granted.", Toast.LENGTH_SHORT).show()
         }
     }
 
