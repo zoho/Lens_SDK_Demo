@@ -35,6 +35,7 @@ import kotlinx.android.synthetic.main.activity_lens.ocr_button
 import kotlinx.android.synthetic.main.activity_lens.qr_button
 import kotlinx.android.synthetic.main.activity_lens.resolution
 import kotlinx.android.synthetic.main.activity_lens.share_camera
+import kotlinx.android.synthetic.main.activity_lens.speaker
 import kotlinx.android.synthetic.main.activity_lens.swap_camera
 import kotlinx.android.synthetic.main.activity_lens.undo_annotation
 import kotlinx.android.synthetic.main.activity_lens.video
@@ -42,6 +43,7 @@ import kotlinx.android.synthetic.main.activity_lens.zoom
 import kotlinx.android.synthetic.main.activity_lens.zoom_seekbar
 
 class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
+
     override fun sessionConnectionState(state: LensType, error: ErrorType?, message: Any) {
         when (state) {
             /**
@@ -63,7 +65,9 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
             }
             LensType.NETWORK_DISCONNECTED -> {
             }
-
+            LensType.NO_NETWORK -> {
+                activity.finish()
+            }
             /**
              * Handle session close if session failed
              */
@@ -72,16 +76,18 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
             LensType.CONTEXT_NOT_AVAILABLE -> {
             }
             LensType.INVALID_SDK_TOKEN -> {
-                Toast.makeText(activity, "Invalid SDK Token.", Toast.LENGTH_LONG).show()
+                Toast.makeText(activity, "Invalid SDK Token", Toast.LENGTH_LONG).show()
                 activity.finish()
             }
             LensType.INVALID_SESSION_KEY -> {
+
             }
 
             /**
              * Handle the results of validating the session.
              */
             LensType.VALID -> {
+
             }
             LensType.ERROR -> {
                 activity.runOnUiThread {
@@ -89,7 +95,7 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                         Toast.makeText(activity, "An upgraded version of Zoho Lens is now available. To continue using Zoho Lens, kindly update the application from the PlayStore.", Toast.LENGTH_LONG).show()
                         activity.finish()
                     } else {
-                        Toast.makeText(activity, message.toString(), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(activity, error.toString(), Toast.LENGTH_SHORT).show()
                         activity.startActivity(Intent(activity, MainActivity::class.java))
                         activity.finish()
                     }
@@ -116,21 +122,34 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
             // * isFirst - State of the boolean value true is first peer and false is second peer
             // * message- peer connection state info
 
-            LensType.PEER_CONNECTED -> {}
-            LensType.PEER_DISCONNECTED -> {}
-            LensType.ICE_STATE_CONNECTED -> {}
-            LensType.ICE_STATE_DISCONNECTED -> {}
-            LensType.ICE_STATE_FAILED -> {}
-            LensType.ICE_STATE_RECONNECTED -> {}
+            LensType.PEER_CONNECTED -> {
+            }
+            LensType.PEER_DISCONNECTED -> {
+            }
+            LensType.ICE_STATE_CONNECTED -> {
+            }
+            LensType.ICE_STATE_DISCONNECTED -> {
+            }
+            LensType.ICE_STATE_FAILED -> {
+            }
+            LensType.ICE_STATE_RECONNECTED -> {
+            }
 
             /**
              * To perform participant join state
              */
-            LensType.CONNECTION_INITIATED -> {}
-            LensType.COMPLETED_PARTICIPANT_JOIN -> {}
-            LensType.CUSTOMER_LEFT_SESSION -> {}
-            LensType.TECHNICIAN_LEFT_SESSION -> {}
-            LensType.INVITE_PARTICIPANT -> {}
+            LensType.CONNECTION_INITIATED -> {
+
+            }
+            LensType.COMPLETED_PARTICIPANT_JOIN -> {
+            }
+            LensType.CUSTOMER_LEFT_SESSION -> {
+            }
+            LensType.TECHNICIAN_LEFT_SESSION -> {
+            }
+            LensType.INVITE_PARTICIPANT -> {
+
+            }
             LensType.SECONDARY_TECHNICIAN_LEFT_SESSION -> {}
             LensType.SERVER_ISSUE_LEFT_SESSION -> {}
             LensType.SOCKET_CLOSED -> {}
@@ -138,8 +157,10 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
             LensType.CLIENT_IS_NOT_COMPATIBLE -> {}
             LensType.ICE_STATE_CLOSED -> {}
             LensType.ICE_STATE_NEW -> {}
-            LensType.ICE_CANDIDATES_LOCAL_CONNECTION_FAILURE -> {}
-            LensType.ICE_CANDIDATES_REMOTE_CONNECTION_FAILURE -> {}
+            LensType.ICE_CANDIDATES_LOCAL_CONNECTION_FAILURE -> {
+            }
+            LensType.ICE_CANDIDATES_REMOTE_CONNECTION_FAILURE -> {
+            }
         }
     }
 
@@ -147,23 +168,30 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
      * Callback used to handle the received messages.
      */
     override fun chatMessage(message: ChatModel) {
-
-    }
-
-    override fun customerAlreadyActiveInSession() {
-
     }
 
     /**
-     * Callback used to perform before starting session microphone is available to use.
+     * Callback used to perform any operation whenever a screenshot is taken.
      */
-
+    override fun onLensScreenShotTaken(displayName: String?) {
+        activity.runOnUiThread {
+            if (displayName != null && displayName != "") {
+                Toast.makeText(activity, "Screenshot taken by $displayName", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(activity, "Screenshot taken", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    /**
+     * Callback used to handle the audio device change
+     */
     override fun onMicroPhoneUsingByOtherApps() {
         activity.runOnUiThread {
             Toast.makeText(activity, "Your microphone is being used by another app. Close any apps that are using the microphone and try again.", Toast.LENGTH_LONG).show()
             activity.finish()
         }
     }
+
     /**
      * Callback used to handle the logs
      */
@@ -172,58 +200,11 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
     }
 
     /**
-     * Callback used to handle the annotation count updates
-     */
-    override fun onAnnotationsCountUpdated(annotationCount: Int?) {
-
-    }
-
-    /**
-     * Callback used to perform any operation related to ar comments.
-     */
-    override fun onArAnnotationDeSelected(arAnnotationObject: ArAnnotationObject) {
-
-    }
-
-    override fun onArAnnotationListUpdate(arAnnotationList: ArrayList<ArAnnotationObject>) {
-
-    }
-
-    override fun onArAnnotationNotesUpdate(arAnnotationObject: ArAnnotationObject) {
-        activity.runOnUiThread {
-            val arComment = arAnnotationObject.notes?.get(0)?.data
-            Toast.makeText(activity, arComment, Toast.LENGTH_LONG).show()
-        }
-    }
-
-    override fun onArAnnotationPlaced(arAnnotationObject: ArAnnotationObject) {
-
-    }
-
-    override fun onArAnnotationRemoved(arAnnotationList: ArrayList<ArAnnotationObject>) {
-
-    }
-
-    override fun onArAnnotationSelected(arAnnotationObject: ArAnnotationObject) {
-
-    }
-
-    override fun onCameraFacingChanged(cameraFacing: CameraFacing) {
-        Toast.makeText(activity, "Camera facing changed to ${cameraFacing.name}", Toast.LENGTH_SHORT).show()
-    }
-
-    /**
      * Returns the activity
      */
     override fun getActivity(): Activity {
         return activity
     }
-
-
-
-    /**
-     * Session is already active in another location so we can't open.
-     */
 
     /**
      * To update the list of technicians currently connected in the session along with the state.
@@ -235,60 +216,63 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
      * Show toast message to the users, Toast type
      */
     override fun showToast(type: LensToast, displayName: String?) {
-        when (type) {
-            LensToast.JOINED_PARTICIPANT -> {
-                displayName?.let {
-                    if (it != "") {
-                        Toast.makeText(activity, "$displayName joined in the session", Toast.LENGTH_SHORT).show()
+        activity.runOnUiThread {
+            when (type) {
+                LensToast.JOINED_PARTICIPANT -> {
+                    displayName?.let {
+                        if (it != "") {
+                            Toast.makeText(activity, "$displayName joined in the session", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
-            }
-            LensToast.LEFT_PARTICIPANT -> {
-                displayName?.let {
-                    if (it != "") {
-                        Toast.makeText(activity, "$displayName left in the session", Toast.LENGTH_SHORT).show()
+                LensToast.LEFT_PARTICIPANT -> {
+                    displayName?.let {
+                        if (it != "") {
+                            Toast.makeText(activity, "$displayName left in the session", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
-            }
-            LensToast.CAMERA_STREAM_CHANGED -> {
-                displayName?.let {
-                    if (it != "") {
-                        Toast.makeText(activity, "$displayName is currently streaming", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-            LensToast.CAMERA_STREAM_REMOVED -> {
-                displayName?.let {
-                    if (it != "") {
-                        Toast.makeText(activity, "$displayName is removed streaming", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-            LensToast.CAMERA_STREAM_REQUEST_SOMEONE_WAITING_ALREADY -> {
-                displayName?.let {
-                    if (it != "") {
-                        Toast.makeText(activity, "$displayName is waiting to streaming", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
 
-            LensToast.CAMERA_STREAM_REQUEST_RECEIVED -> {}
-            LensToast.CAMERA_STREAM_REQUEST_APPROVED -> {
-                displayName?.let {
-                    if (it != "") {
-                        Toast.makeText(activity, "$displayName streaming request approved", Toast.LENGTH_SHORT).show()
+                LensToast.CAMERA_STREAM_CHANGED -> {
+                    displayName?.let {
+                        if (it != "") {
+                            Toast.makeText(activity, "$displayName is currently streaming", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
-            }
-            LensToast.CAMERA_STREAM_REQUEST_DENIED -> {
-                displayName?.let {
-                    if (it != "") {
-                        Toast.makeText(activity, "$displayName streaming request denied", Toast.LENGTH_SHORT).show()
+                LensToast.CAMERA_STREAM_REMOVED -> {
+                    displayName?.let {
+                        if (it != "") {
+                            Toast.makeText(activity, "$displayName is removed streaming", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
-            }
-            else -> {
+                LensToast.CAMERA_STREAM_REQUEST_SOMEONE_WAITING_ALREADY -> {
+                    displayName?.let {
+                        if (it != "") {
+                            Toast.makeText(activity, "$displayName is waiting to streaming", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
 
+                LensToast.CAMERA_STREAM_REQUEST_RECEIVED -> {}
+                LensToast.CAMERA_STREAM_REQUEST_APPROVED -> {
+                    displayName?.let {
+                        if (it != "") {
+                            Toast.makeText(activity, "$displayName streaming request approved", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+                LensToast.CAMERA_STREAM_REQUEST_DENIED -> {
+                    displayName?.let {
+                        if (it != "") {
+                            Toast.makeText(activity, "$displayName streaming request denied", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+                else -> {
+
+                }
             }
         }
     }
@@ -301,18 +285,21 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         }
     }
 
+
     /**
      * Callback used to perform any operation whenever the audio device gets changed.
      */
     override fun audioDeviceChange(selectedAudioDevice: AudioDevice, availableAudioDevices: MutableSet<AudioDevice>) {
+
         /*
         * List down the devices and switch the audio mode
         */
         LensSDK.switchAudioMode(selectedAudioDevice)
+        activity.speaker.text = selectedAudioDevice.name
     }
 
     /**
-     * Callback used to handle the chatlet state
+     * Callback used to handle when chatlet state is changed
      */
     override fun chatLetState(currentStatus: ChatLetState) {
         activity.chatFragment.chatLetState.postValue(currentStatus)
@@ -340,6 +327,41 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                 }
             }
         }
+    }
+
+    /**
+     * Callback used to handle the annotation count updates
+     */
+    override fun onAnnotationsCountUpdated(annotationCount: Int?) {
+    }
+
+    override fun onArAnnotationDeSelected(arAnnotationObject: ArAnnotationObject) {
+    }
+
+    override fun onArAnnotationListUpdate(arAnnotationList: ArrayList<ArAnnotationObject>) {
+    }
+
+    override fun onArAnnotationNotesUpdate(arAnnotationObject: ArAnnotationObject) {
+    }
+
+    override fun onArAnnotationPlaced(arAnnotationObject: ArAnnotationObject) {
+    }
+
+    override fun onArAnnotationRemoved(arAnnotationList: ArrayList<ArAnnotationObject>) {
+    }
+
+    override fun onArAnnotationSelected(arAnnotationObject: ArAnnotationObject) {
+    }
+
+    /**
+     * Callback used to handle when camera facing is changed
+     */
+    override fun onCameraFacingChanged(cameraFacing: CameraFacing) {
+        Toast.makeText(activity, "Camera facing changed to ${cameraFacing.name}", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun customerAlreadyActiveInSession() {
+
     }
 
     /**
@@ -452,6 +474,9 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
 
     }
 
+    /**
+     * Callback used to handle for features based on the license
+     */
     override fun onFeatureNotAvailableWithCurrentLicense(feature: Feature) {
         activity.runOnUiThread {
             when (feature) {
@@ -541,14 +566,6 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         }
     }
 
-    override fun onLensScreenShotTaken(displayName: String?) {
-        if (displayName != null && displayName != "") {
-            Toast.makeText(activity, "Screenshot taken by $displayName", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(activity, "Screenshot taken", Toast.LENGTH_SHORT).show()
-        }
-    }
-
     /**
      * Callback used to handle swap camera
      */
@@ -579,6 +596,9 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         activity.onChatLetReverted(status)
     }
 
+    /**
+     * Callback used to handle the device lock state
+     */
     override fun onDeviceLockStateChanged(deviceLockState: DeviceLockState, displayName: String?) {
         displayName?.let {
             if (it != "") {
