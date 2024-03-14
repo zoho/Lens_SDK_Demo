@@ -11,9 +11,13 @@ import com.example.arcore_assistrtc.enums.TrackingFailureReason
 import com.example.arcore_assistrtc.enums.TrackingState
 import com.zoho.lens.ArAnnotationObject
 import com.zoho.lens.AudioDevice
+import com.zoho.lens.CameraFacing
 import com.zoho.lens.ChatModel
+import com.zoho.lens.DeviceLockState
 import com.zoho.lens.ErrorType
+import com.zoho.lens.Feature
 import com.zoho.lens.FlashSupportStatus
+import com.zoho.lens.FreezeActions
 import com.zoho.lens.ISessionCallback
 import com.zoho.lens.LensSDK
 import com.zoho.lens.LensToast
@@ -29,6 +33,7 @@ import kotlinx.android.synthetic.main.activity_lens.flash_light
 import kotlinx.android.synthetic.main.activity_lens.mute_unmute_self
 import kotlinx.android.synthetic.main.activity_lens.ocr_button
 import kotlinx.android.synthetic.main.activity_lens.qr_button
+import kotlinx.android.synthetic.main.activity_lens.resolution
 import kotlinx.android.synthetic.main.activity_lens.share_camera
 import kotlinx.android.synthetic.main.activity_lens.swap_camera
 import kotlinx.android.synthetic.main.activity_lens.undo_annotation
@@ -37,7 +42,7 @@ import kotlinx.android.synthetic.main.activity_lens.zoom
 import kotlinx.android.synthetic.main.activity_lens.zoom_seekbar
 
 class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
-    override fun sessionConnectionState(state: LensType, error: ErrorType?, message: String) {
+    override fun sessionConnectionState(state: LensType, error: ErrorType?, message: Any) {
         when (state) {
             /**
              * Handle the socket connection’s state.
@@ -84,7 +89,7 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                         Toast.makeText(activity, "An upgraded version of Zoho Lens is now available. To continue using Zoho Lens, kindly update the application from the PlayStore.", Toast.LENGTH_LONG).show()
                         activity.finish()
                     } else {
-                        Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(activity, message.toString(), Toast.LENGTH_SHORT).show()
                         activity.startActivity(Intent(activity, MainActivity::class.java))
                         activity.finish()
                     }
@@ -144,14 +149,8 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
     override fun chatMessage(message: ChatModel) {
     }
 
-    override fun clientAlreadyActiveInSession() {
+    override fun customerAlreadyActiveInSession() {
 
-    }
-
-    override fun onLensScreenShotTaken() {
-        activity.runOnUiThread {
-            Toast.makeText(activity, "Screenshot taken", Toast.LENGTH_SHORT).show()
-        }
     }
 
     /**
@@ -164,18 +163,18 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
             activity.finish()
         }
     }
-
-    override fun onNotifyNewChatMessage(rawMessage: String, senderName: String) {
-        activity.runOnUiThread {
-            Toast.makeText(activity, "$senderName : $rawMessage", Toast.LENGTH_SHORT).show()
-        }
-    }
-
     /**
      * Callback used to handle the logs
      */
     override fun log(tag: String, message: String) {
         Log.d(tag, message)
+    }
+
+    /**
+     * Callback used to handle the annotation count updates
+     */
+    override fun onAnnotationsCountUpdated(annotationCount: Int?) {
+
     }
 
     /**
@@ -208,6 +207,10 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
 
     }
 
+    override fun onCameraFacingChanged(cameraFacing: CameraFacing) {
+        Toast.makeText(activity, "Camera facing changed to ${cameraFacing.name}", Toast.LENGTH_SHORT).show()
+    }
+
     /**
      * Returns the activity
      */
@@ -215,15 +218,11 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         return activity
     }
 
-    /**
-     * Callback used to handle the video freeze state
-     */
+
 
     /**
      * Session is already active in another location so we can't open.
      */
-    override fun openedInDifferentLocation() {
-    }
 
     /**
      * To update the list of technicians currently connected in the session along with the state.
@@ -236,48 +235,6 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
      */
     override fun showToast(type: LensToast, displayName: String?) {
         when (type) {
-            LensToast.TECHNICIAN_FROZEN_VIDEO, LensToast.SECONDARY_TECH_FROZEN_VIDEO, LensToast.CUSTOMER_FROZEN_VIDEO -> {
-                displayName?.let {
-                    activity.isMuteVideo = true
-                    activity.video.isChecked = true
-                    if (it != "") {
-                        Toast.makeText(activity, "$displayName frozen video streaming", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-            LensToast.TECHNICIAN_UNFROZEN_VIDEO, LensToast.SECONDARY_TECH_UNFROZEN_VIDEO, LensToast.CUSTOMER_UNFROZEN_VIDEO -> {
-                activity.isMuteVideo = false
-                activity.video.isChecked = false
-                displayName?.let {
-                    if (it != "") {
-                        Toast.makeText(activity, "$displayName unfrozen video streaming", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-
-            LensToast.TECHNICIAN_FROZEN_SNAPSHOT,LensToast.SECONDARY_TECHNICIAN_FROZEN_SNAPSHOT -> {
-                displayName?.let {
-                    if (it != "") {
-                        Toast.makeText(activity, "$displayName frozen snapshot", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-            LensToast.TECHNICIAN_UN_FROZEN_SNAPSHOT, LensToast.SECONDARY_TECHNICIAN_UN_FROZEN_SNAPSHOT -> {
-                displayName?.let {
-                    if (it != "") {
-                        Toast.makeText(activity, "$displayName unfrozen snapshot", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-
-            LensToast.SECONDARY_TECH_CANNOT_FREEZE_UNFREEZE_VIDEO -> {
-                displayName?.let {
-                    if (it != "") {
-                        Toast.makeText(activity, "$displayName cannot freeze/unfreeze video streaming", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-
             LensToast.JOINED_PARTICIPANT -> {
                 displayName?.let {
                     if (it != "") {
@@ -292,12 +249,6 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                     }
                 }
             }
-
-            LensToast.ANCHOR_PLACED -> {}
-            LensToast.ANCHOR_SELECTED -> {}
-            LensToast.ANCHOR_DESELECTED -> {}
-            LensToast.ANCHOR_PLACE_FAILED -> {}
-
             LensToast.CAMERA_STREAM_CHANGED -> {
                 displayName?.let {
                     if (it != "") {
@@ -335,20 +286,8 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                     }
                 }
             }
+            else -> {
 
-            LensToast.ZFS_SNAPSHOT_DOWNLOADED -> {
-                displayName?.let {
-                    if (it != "") {
-                        Toast.makeText(activity, "$displayName downloaed snapshot for freeze", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-            LensToast.ZFS_SNAPSHOT_DOWNLOAD_FAILED -> {
-                displayName?.let {
-                    if (it != "") {
-                        Toast.makeText(activity, "$displayName downloading failed snapshot for freeze", Toast.LENGTH_SHORT).show()
-                    }
-                }
             }
         }
     }
@@ -400,18 +339,6 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
     }
 
     /**
-     * Callback used to handle the annotation count updates
-     */
-    override fun annotationsUpdated(annotationCount: Int?) {
-    }
-
-    /**
-     * Callback used to handle the selected/ Unselected annotation with annotation Id
-     */
-    override fun annotationSelection(isSelected: Boolean, id: String?) {
-    }
-
-    /**
      * Callback used to perform any operation whenever streaming type is changing.
      */
     override fun showStreamingType(type: StreamingType, displayName: String?) {
@@ -426,6 +353,10 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                         activity.zoom.visibility = View.VISIBLE
                         activity.undo_annotation.visibility = View.VISIBLE
                         activity.clear_all_annotation.visibility = View.VISIBLE
+                        activity.resolution.visibility = View.VISIBLE
+
+                        LensSDK.setResolution(false)
+                        activity.resolution.text = "Non HD"
                     }
 
                     activity.video.visibility = View.VISIBLE
@@ -434,6 +365,7 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                     activity.zoom_seekbar.visibility = View.GONE
 
                     activity.share_camera.text = "Video Off"
+//                    activity.share_camera.isChecked = false
                     activity.share_camera.visibility = View.VISIBLE
                     activity.flash_light.visibility = View.GONE
 
@@ -446,19 +378,21 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                     }, 5000)
                 }
                 StreamingType.VIDEO_DOWNSTREAM -> {
-                    activity.swap_camera.visibility = View.VISIBLE
+                    activity.swap_camera.visibility = View.GONE
                     activity.ocr_button.visibility = View.VISIBLE
                     activity.qr_button.visibility = View.VISIBLE
                     activity.zoom.visibility = View.GONE
-                    activity.video.visibility = View.GONE
+                    activity.video.visibility = View.VISIBLE
                     activity.undo_annotation.visibility = View.GONE
                     activity.clear_all_annotation.visibility = View.GONE
+                    activity.resolution.visibility = View.GONE
 
                     activity.zoom.isChecked = false
                     activity.zoom.visibility = View.GONE
                     activity.zoom_seekbar.visibility = View.GONE
 
                     activity.share_camera.text = "Video On"
+                    activity.share_camera.isChecked = false
                     activity.share_camera.visibility = View.VISIBLE
 
                     Handler(Looper.getMainLooper()).postDelayed({
@@ -473,9 +407,11 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                             activity.flash_light.visibility = View.GONE
                         }
                     }, 5000)
+
                 }
                 StreamingType.NO_ONE_IS_STREAMING -> {
                     activity.swap_camera.visibility = View.GONE
+                    activity.resolution.visibility = View.GONE
                     activity.ocr_button.visibility = View.GONE
                     activity.qr_button.visibility = View.GONE
                     activity.zoom.visibility = View.GONE
@@ -486,6 +422,7 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                     activity.flash_light.visibility = View.GONE
 
                     activity.share_camera.text = "Video On"
+                    activity.share_camera.isChecked = false
                     activity.share_camera.visibility = View.VISIBLE
 
                     Handler(Looper.getMainLooper()).postDelayed({
@@ -502,6 +439,25 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
 
     override fun onFPSUpdate(averageFPS: Int, fifteenthSecondFPS: Int) {
 
+    }
+
+    override fun onFeatureNotAvailableWithCurrentLicense(feature: Feature) {
+        activity.runOnUiThread {
+            when (feature) {
+                Feature.FREEZE_CAMERA_STREAM -> {
+                    activity.isMuteVideo = false
+                    activity.video.isChecked = false
+                }
+                Feature.SHARE_CAMERA -> {
+                    activity.share_camera.text = "Video Off"
+                    activity.share_camera.isChecked = true
+                }
+                else -> {
+
+                }
+            }
+            Toast.makeText(activity, "Feature available only in Standard / Professional edition. Upgrade to use.", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onFlashLightOff(flashSupportStatus: FlashSupportStatus, displayName: String?) {
@@ -542,6 +498,43 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         }
     }
 
+    /**
+     * Callback used to handle the freeze state
+     */
+    override fun onFreezeActions(freezeActions: FreezeActions, displayName: String?) {
+        when (freezeActions) {
+            FreezeActions.FREEZE_SNAPSHOT, FreezeActions.FREEZE_VIDEO,
+            FreezeActions.FREEZE_SNAPSHOT_DOWNLOADED,FreezeActions.FREEZE_SNAPSHOT_SELF -> {
+                activity.runOnUiThread {
+                    activity.isMuteVideo = true
+                    activity.video.isChecked = true
+                }
+            }
+            FreezeActions.UNFREEZE_SNAPSHOT, FreezeActions.UNFREEZE_VIDEO, FreezeActions.UNFREEZE_SNAPSHOT_SELF -> {
+                activity.runOnUiThread {
+                    activity.isMuteVideo = false
+                    activity.video.isChecked = false
+                }
+            }
+            FreezeActions.FREEZE_SNAPSHOT_DOWNLOAD_FAILED -> {
+
+            }
+        }
+        displayName?.let {
+            if (it != "") {
+                Toast.makeText(activity, "$displayName ${freezeActions.name}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    override fun onLensScreenShotTaken(displayName: String?) {
+        if (displayName != null && displayName != "") {
+            Toast.makeText(activity, "Screenshot taken by $displayName", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(activity, "Screenshot taken", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onCameraSwapDone(isFrontCamera: Boolean) {
         activity.runOnUiThread {
             activity.zoom.isChecked = false
@@ -553,6 +546,14 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
 
     override fun onChatLetReverted(status: Boolean) {
         activity.onChatLetReverted(status)
+    }
+
+    override fun onDeviceLockStateChanged(deviceLockState: DeviceLockState, displayName: String?) {
+        displayName?.let {
+            if (it != "") {
+                Toast.makeText(activity, "$displayName is ${deviceLockState.name} screen", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     override fun onOCRStateChanged(ocrStateModel: OCRStateModel) {
@@ -588,6 +589,12 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
             if (!willRetry) {
                 Toast.makeText(activity, errorMessage, Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    override fun onQRScanStarted() {
+        activity.runOnUiThread {
+            Toast.makeText(activity, "Scanning started", Toast.LENGTH_SHORT).show()
         }
     }
 }
