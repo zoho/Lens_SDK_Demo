@@ -147,6 +147,7 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
      * Callback used to handle the received messages.
      */
     override fun chatMessage(message: ChatModel) {
+
     }
 
     override fun customerAlreadyActiveInSession() {
@@ -310,6 +311,9 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         LensSDK.switchAudioMode(selectedAudioDevice)
     }
 
+    /**
+     * Callback used to handle the chatlet state
+     */
     override fun chatLetState(currentStatus: ChatLetState) {
         activity.chatFragment.chatLetState.postValue(currentStatus)
         activity.chatLetState.postValue(currentStatus)
@@ -364,6 +368,7 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                     activity.zoom.isChecked = false
                     activity.zoom_seekbar.visibility = View.GONE
 
+                    activity.share_camera.isChecked = true
                     activity.share_camera.text = "Video Off"
 //                    activity.share_camera.isChecked = false
                     activity.share_camera.visibility = View.VISIBLE
@@ -391,6 +396,7 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                     activity.zoom.visibility = View.GONE
                     activity.zoom_seekbar.visibility = View.GONE
 
+                    activity.share_camera.isChecked = false
                     activity.share_camera.text = "Video On"
                     activity.share_camera.isChecked = false
                     activity.share_camera.visibility = View.VISIBLE
@@ -420,7 +426,9 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                     activity.undo_annotation.visibility = View.GONE
                     activity.clear_all_annotation.visibility = View.GONE
                     activity.flash_light.visibility = View.GONE
+                    activity.resolution.visibility = View.GONE
 
+                    activity.share_camera.isChecked = false
                     activity.share_camera.text = "Video On"
                     activity.share_camera.isChecked = false
                     activity.share_camera.visibility = View.VISIBLE
@@ -437,6 +445,9 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         }
     }
 
+    /**
+     * Callback used to handle the fpsUpdate
+     */
     override fun onFPSUpdate(averageFPS: Int, fifteenthSecondFPS: Int) {
 
     }
@@ -460,6 +471,9 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         }
     }
 
+    /**
+     * Callback used to handle the flash ligh on/off state
+     */
     override fun onFlashLightOff(flashSupportStatus: FlashSupportStatus, displayName: String?) {
         when (flashSupportStatus) {
             FlashSupportStatus.SUCCESS -> {
@@ -535,15 +549,32 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         }
     }
 
+    /**
+     * Callback used to handle swap camera
+     */
     override fun onCameraSwapDone(isFrontCamera: Boolean) {
         activity.runOnUiThread {
+            if (LensSDK.isARMode() && !isFrontCamera) {
+                activity.zoom.visibility = View.VISIBLE
+
+                activity.clear_all_annotation.visibility = View.VISIBLE
+                activity.undo_annotation.visibility = View.VISIBLE
+            } else {
+                activity.zoom.visibility = View.GONE
+
+                activity.clear_all_annotation.visibility = View.GONE
+                activity.undo_annotation.visibility = View.GONE
+            }
+
             activity.zoom.isChecked = false
             activity.zoom_seekbar.visibility = View.GONE
-
             LensSDK.setZoomPercentage(0f)
         }
     }
 
+    /**
+     * Callback used to handle if chatlet reverted
+     */
     override fun onChatLetReverted(status: Boolean) {
         activity.onChatLetReverted(status)
     }
@@ -556,6 +587,9 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         }
     }
 
+    /**
+     * Callback used to handle Live text scan states
+     */
     override fun onOCRStateChanged(ocrStateModel: OCRStateModel) {
         when (ocrStateModel.ocrState) {
             OCRState.STARTED -> {
@@ -565,7 +599,6 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
             }
             OCRState.COMPLETED -> {
                 activity.runOnUiThread {
-                    Toast.makeText(activity, ocrStateModel.ocrText ?: "", Toast.LENGTH_SHORT).show()
                     activity.onLiveTextScanCompleted(ocrStateModel.ocrText ?: "")
                 }
             }
@@ -577,13 +610,18 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         }
     }
 
+    /**
+     * Callback used to handle QR/Barcode scan success state
+     */
     override fun onQRSuccess(qrText: String) {
         activity.runOnUiThread {
-            Toast.makeText(activity, qrText, Toast.LENGTH_SHORT).show()
             activity.onQRScanCompleted(qrText)
         }
     }
 
+    /**
+     * Callback used to handle QR/Barcode failure success state
+     */
     override fun onQRFailure(errorMessage: String, willRetry: Boolean) {
         activity.runOnUiThread {
             if (!willRetry) {

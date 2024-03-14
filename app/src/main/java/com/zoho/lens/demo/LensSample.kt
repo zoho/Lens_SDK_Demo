@@ -23,12 +23,14 @@ import com.zoho.lens.handler.QRHandler
 import kotlinx.android.synthetic.main.activity_lens.chat_button
 import kotlinx.android.synthetic.main.activity_lens.clear_all_annotation
 import kotlinx.android.synthetic.main.activity_lens.close
+import kotlinx.android.synthetic.main.activity_lens.flash_light
 import kotlinx.android.synthetic.main.activity_lens.green
 import kotlinx.android.synthetic.main.activity_lens.mute_unmute_self
 import kotlinx.android.synthetic.main.activity_lens.ocr_button
 import kotlinx.android.synthetic.main.activity_lens.orange
 import kotlinx.android.synthetic.main.activity_lens.qr_button
 import kotlinx.android.synthetic.main.activity_lens.red
+import kotlinx.android.synthetic.main.activity_lens.resolution
 import kotlinx.android.synthetic.main.activity_lens.share_camera
 import kotlinx.android.synthetic.main.activity_lens.speaker
 import kotlinx.android.synthetic.main.activity_lens.stream_view
@@ -42,12 +44,14 @@ import kotlinx.android.synthetic.main.activity_lens.zoom_seekbar
 
 class LensSample : AppCompatActivity() {
     private var sessionKey: String? = null
-    private var mailId: String? = ""
+    private var mailId: String? = "Customer"
+    private var userName: String = "Customer"
     var changedMuteSelf: Boolean = false
     val chatFragment = ChatFragment.newInstance()
     val chatLetState = MutableLiveData<ChatLetState>()
     private lateinit var liveTextResultFragment: LiveTextResultFragment
     var isMuteVideo = false
+    var flashStatus = false
 
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
@@ -86,14 +90,14 @@ class LensSample : AppCompatActivity() {
             //Optional, Set whether the AR mode enable or disable for .
             .setARMode(isAR)
             //Optional,  Enable or disable high quality resolution for AR session
-            .setResolution(true)
+            .setResolution(false)
             /**
              * Set the current best knowledge of a real-world planar surface and detect the objects.
              */
             // To add the rendering  view to display local and remote views
             .addStreamingView(stream_view)
             //Optional,  Update customer info
-            .setUserInfo(UserInfo("Client Name",mailId))
+            .setUserInfo(UserInfo(userName ,mailId))
             //  session key to start the valid session
             //  Required, Set the sdkToken to be used for validation
             //  Required, Set the authToken to be used for technician validation
@@ -157,8 +161,8 @@ class LensSample : AppCompatActivity() {
             LensSDK.requestQR(isSilent = false, shouldContinuouslyRetry = QRHandler.RetryMode.RETRY_CONTINOUSLY)
         }
 
-        share_camera.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
+        share_camera.setOnClickListener {
+            if (share_camera.isChecked) {
                 LensSDK.shareCameraRequest()
             } else {
                 LensSDK.stopCameraRequest()
@@ -179,6 +183,24 @@ class LensSample : AppCompatActivity() {
 
         clear_all_annotation.setOnClickListener {
             LensSDK.clearAllAnnotations()
+        }
+
+        flash_light.setOnClickListener {
+            if (flashStatus) {
+                LensSDK.setFlashOff()
+            } else {
+                LensSDK.setFlashOn()
+            }
+
+        }
+
+        resolution.setOnClickListener {
+            LensSDK.setResolution(!LensSDK.getResolution())
+            if (LensSDK.getResolution()) {
+                resolution.text = "HD"
+            } else {
+                resolution.text = "Non HD"
+            }
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
