@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
         <variable
-            name="viewmodel"
+            name="lensSessionViewModel"
             type="com.zoho.lens.demo.LensViewModel" />
     </data>
 
@@ -39,7 +40,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Swap Camera"
-                        android:visibility="visible"/>
+                        android:visibility="visible" />
 
                     <ToggleButton
                         android:id="@+id/resolution"
@@ -48,7 +49,7 @@
                         android:text="HD"
                         android:textOff="HD"
                         android:textOn="NON HD"
-                        android:visibility="visible"/>
+                        android:visibility="gone" />
 
                     <ToggleButton
                         android:id="@+id/mute_unmute_self"
@@ -72,7 +73,16 @@
                         android:layout_height="wrap_content"
                         android:checked="false"
                         android:textOff="Freeze Video"
-                        android:textOn="Unfreeze Video" />
+                        android:textOn="Unfreeze" />
+
+                    <ToggleButton
+                        android:id="@+id/annotation"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="false"
+                        android:textOff="Annotation"
+                        android:textOn="Annotation"
+                        android:visibility="visible" />
 
                     <Button
                         android:id="@+id/chat_button"
@@ -80,7 +90,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:text="Chat"
-                        android:visibility="gone"/>
+                        android:visibility="gone" />
+
 
                     <Button
                         android:id="@+id/ocr_button"
@@ -88,7 +99,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:text="Live Text"
-                        android:visibility="visible"/>
+                        android:visibility="visible" />
 
                     <Button
                         android:id="@+id/qr_button"
@@ -96,7 +107,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:text="Scan"
-                        android:visibility="visible"/>
+                        android:visibility="visible" />
 
                     <ToggleButton
                         android:id="@+id/flash_light"
@@ -105,7 +116,7 @@
                         android:layout_marginEnd="8dp"
                         android:textOff="Flash On"
                         android:textOn="Flash Off"
-                        android:visibility="gone"/>
+                        android:visibility="gone" />
 
                     <ToggleButton
                         android:id="@+id/share_camera"
@@ -115,7 +126,27 @@
                         android:checked="true"
                         android:textOff="Video On"
                         android:textOn="Video Off"
-                        android:visibility="visible"/>
+                        android:visibility="visible" />
+
+                    <ToggleButton
+                        android:id="@+id/point_cloud"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:checked="true"
+                        android:textOff="Point Cloud Off"
+                        android:textOn="Point Cloud On"
+                        android:visibility="visible" />
+
+                    <ToggleButton
+                        android:id="@+id/plane_detection"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:checked="true"
+                        android:textOff="Plane Detection Off"
+                        android:textOn="Plane Detection On"
+                        android:visibility="visible" />
 
                     <ToggleButton
                         android:id="@+id/zoom"
@@ -124,7 +155,7 @@
                         android:layout_marginEnd="8dp"
                         android:textOff="Zoom"
                         android:textOn="Zoom Out"
-                        android:visibility="visible"/>
+                        android:visibility="visible" />
 
                     <Button
                         android:id="@+id/undo_annotation"
@@ -132,7 +163,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:text="Undo Annotation"
-                        android:visibility="visible"/>
+                        android:visibility="visible" />
 
                     <Button
                         android:id="@+id/clear_all_annotation"
@@ -140,7 +171,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:text="Clear All Annotations"
-                        android:visibility="visible"/>
+                        android:visibility="visible" />
 
                     <Button
                         android:id="@+id/close"
@@ -150,6 +181,69 @@
                 </LinearLayout>
             </HorizontalScrollView>
 
+            <HorizontalScrollView
+                android:id="@+id/annotation_scroll_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/arrow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="Arrow"
+                        android:visibility="visible" />
+
+                    <Button
+                        android:id="@+id/pencil"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="Pencil"
+                        android:visibility="visible" />
+
+                    <Button
+                        android:id="@+id/rectangle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="Rectangle"
+                        android:visibility="visible" />
+
+                    <Button
+                        android:id="@+id/ellipse"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="Ellipse"
+                        android:visibility="visible" />
+
+                    <Button
+                        android:id="@+id/ar_measure"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="AR Measure"
+                        android:visibility="visible" />
+
+                    <Button
+                        android:id="@+id/ar_pointer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="AR Pointer"
+                        android:visibility="visible" />
+
+                </LinearLayout>
+
+            </HorizontalScrollView>
+
             <SeekBar
                 android:id="@+id/zoom_seekbar"
                 android:layout_width="match_parent"
@@ -157,9 +251,32 @@
                 android:paddingTop="16dp"
                 android:paddingBottom="12dp"
                 android:progress="0"
-                android:visibility="gone"
                 android:progressBackgroundTint="@color/white"
-                android:thumb="@drawable/seekbar_thumb" />
+                android:thumb="@drawable/seekbar_thumb"
+                android:visibility="gone" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="100dp"
+                    android:background="@color/colorPrimary"
+                    android:visibility="gone">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerview"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@color/colorAccent"
+                        android:scrollbars="horizontal"
+                        android:visibility="visible"
+                        tools:listitem="@layout/snap_item" />
+
+                </LinearLayout>
+            </HorizontalScrollView>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -170,21 +287,25 @@
 
                 <Button
                     android:id="@+id/red"
+                    style="?android:buttonBarButtonStyle"
                     android:layout_width="50dp"
                     android:layout_height="50dp" />
 
                 <Button
                     android:id="@+id/green"
+                    style="?android:buttonBarButtonStyle"
                     android:layout_width="50dp"
                     android:layout_height="50dp" />
 
                 <Button
                     android:id="@+id/yellow"
+                    style="?android:buttonBarButtonStyle"
                     android:layout_width="50dp"
                     android:layout_height="50dp" />
 
                 <Button
                     android:id="@+id/orange"
+                    style="?android:buttonBarButtonStyle"
                     android:layout_width="50dp"
                     android:layout_height="50dp" />
 
@@ -192,6 +313,25 @@
             </LinearLayout>
 
         </LinearLayout>
+
+        <ImageView
+            android:id="@+id/ar_measure_center_anchor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:contentDescription="Measure"
+            android:src="@drawable/ar_measure_center_icon"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/ar_measure_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_marginBottom="8dp"
+            android:contentDescription="Measure"
+            android:src="@drawable/ar_measure_tap_icon"
+            android:visibility="gone" />
 
     </FrameLayout>
 

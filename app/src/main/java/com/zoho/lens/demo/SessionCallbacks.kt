@@ -10,7 +10,6 @@ import android.widget.Toast
 import com.example.arcore_assistrtc.enums.TrackingFailureReason
 import com.example.arcore_assistrtc.enums.TrackingState
 import com.zoho.lens.ArAnnotationObject
-import com.zoho.lens.AudioDevice
 import com.zoho.lens.CameraFacing
 import com.zoho.lens.ChatModel
 import com.zoho.lens.DeviceLockState
@@ -27,68 +26,43 @@ import com.zoho.lens.OCRStateModel
 import com.zoho.lens.ParticipantStatus
 import com.zoho.lens.StreamingType
 import com.zoho.lens.chatLet.ChatLetState
-import kotlinx.android.synthetic.main.activity_lens.chat_button
-import kotlinx.android.synthetic.main.activity_lens.clear_all_annotation
-import kotlinx.android.synthetic.main.activity_lens.flash_light
-import kotlinx.android.synthetic.main.activity_lens.mute_unmute_self
-import kotlinx.android.synthetic.main.activity_lens.ocr_button
-import kotlinx.android.synthetic.main.activity_lens.qr_button
-import kotlinx.android.synthetic.main.activity_lens.resolution
-import kotlinx.android.synthetic.main.activity_lens.share_camera
-import kotlinx.android.synthetic.main.activity_lens.speaker
-import kotlinx.android.synthetic.main.activity_lens.swap_camera
-import kotlinx.android.synthetic.main.activity_lens.undo_annotation
-import kotlinx.android.synthetic.main.activity_lens.video
-import kotlinx.android.synthetic.main.activity_lens.zoom
-import kotlinx.android.synthetic.main.activity_lens.zoom_seekbar
+import com.zoho.webrtc.AppRTCAudioManager
 
 class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
 
     override fun sessionConnectionState(state: LensType, error: ErrorType?, message: Any) {
         when (state) {
-            /**
-             * Handle the socket connection’s state.
-             */
-            LensType.SOCKET_CONNECTED -> {
-            }
-            LensType.SOCKET_DISCONNECTED -> {
-            }
-            LensType.SOCKET_ERROR -> {
-            }
-            LensType.SOCKET_FAILED -> {
-            }
 
             /**
              * Handle the network state.
              */
-            LensType.NETWORK_CONNECTED -> {
-            }
-            LensType.NETWORK_DISCONNECTED -> {
-            }
             LensType.NO_NETWORK -> {
+                Toast.makeText(activity, "Network disconnected.", Toast.LENGTH_LONG).show()
                 activity.finish()
             }
             /**
              * Handle session close if session failed
              */
             LensType.BELOW_MIN_API_LEVEL -> {
+                Toast.makeText(activity, "Something went wrong, please try again later.", Toast.LENGTH_LONG).show()
+                activity.finish()
             }
             LensType.CONTEXT_NOT_AVAILABLE -> {
+                Toast.makeText(activity, "Something went wrong, please try again later.", Toast.LENGTH_LONG).show()
+                activity.finish()
             }
             LensType.INVALID_SDK_TOKEN -> {
                 Toast.makeText(activity, "Invalid SDK Token", Toast.LENGTH_LONG).show()
                 activity.finish()
             }
             LensType.INVALID_SESSION_KEY -> {
-
+                Toast.makeText(activity, "Invalid Session Key", Toast.LENGTH_LONG).show()
+                activity.finish()
             }
 
             /**
-             * Handle the results of validating the session.
+             * Handle the error results of validating the session.
              */
-            LensType.VALID -> {
-
-            }
             LensType.ERROR -> {
                 activity.runOnUiThread {
                     if (error == ErrorType.UPDATE_TO_LATEST_APP) {
@@ -111,55 +85,8 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                  */
                 activity.onClosedSession()
             }
-            LensType.SESSION_CONNECTED -> {
-                /**
-                 * Switch the fragment to and pass the webrtc render view
-                 */
-            }
-            /**
-             * To perform any operation using the peer connection state.
-             */
-            // * isFirst - State of the boolean value true is first peer and false is second peer
-            // * message- peer connection state info
+            else -> {
 
-            LensType.PEER_CONNECTED -> {
-            }
-            LensType.PEER_DISCONNECTED -> {
-            }
-            LensType.ICE_STATE_CONNECTED -> {
-            }
-            LensType.ICE_STATE_DISCONNECTED -> {
-            }
-            LensType.ICE_STATE_FAILED -> {
-            }
-            LensType.ICE_STATE_RECONNECTED -> {
-            }
-
-            /**
-             * To perform participant join state
-             */
-            LensType.CONNECTION_INITIATED -> {
-
-            }
-            LensType.COMPLETED_PARTICIPANT_JOIN -> {
-            }
-            LensType.CUSTOMER_LEFT_SESSION -> {
-            }
-            LensType.TECHNICIAN_LEFT_SESSION -> {
-            }
-            LensType.INVITE_PARTICIPANT -> {
-
-            }
-            LensType.SECONDARY_TECHNICIAN_LEFT_SESSION -> {}
-            LensType.SERVER_ISSUE_LEFT_SESSION -> {}
-            LensType.SOCKET_CLOSED -> {}
-            LensType.SOCKET_CONNECTING -> {}
-            LensType.CLIENT_IS_NOT_COMPATIBLE -> {}
-            LensType.ICE_STATE_CLOSED -> {}
-            LensType.ICE_STATE_NEW -> {}
-            LensType.ICE_CANDIDATES_LOCAL_CONNECTION_FAILURE -> {
-            }
-            LensType.ICE_CANDIDATES_REMOTE_CONNECTION_FAILURE -> {
             }
         }
     }
@@ -254,8 +181,6 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
                         }
                     }
                 }
-
-                LensToast.CAMERA_STREAM_REQUEST_RECEIVED -> {}
                 LensToast.CAMERA_STREAM_REQUEST_APPROVED -> {
                     displayName?.let {
                         if (it != "") {
@@ -289,13 +214,13 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
     /**
      * Callback used to perform any operation whenever the audio device gets changed.
      */
-    override fun audioDeviceChange(selectedAudioDevice: AudioDevice, availableAudioDevices: MutableSet<AudioDevice>) {
+    override fun audioDeviceChange(selectedAudioDevice: AppRTCAudioManager.AudioDevice, availableAudioDevices: MutableSet<AppRTCAudioManager.AudioDevice>) {
 
         /*
         * List down the devices and switch the audio mode
         */
         LensSDK.switchAudioMode(selectedAudioDevice)
-        activity.speaker.text = selectedAudioDevice.name
+        activity.viewDataBinding.speaker.text = selectedAudioDevice.name
     }
 
     /**
@@ -313,17 +238,17 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         activity.runOnUiThread {
             if (isMute) {
                 if (activity.changedMuteSelf) {
-                    activity.mute_unmute_self.isChecked = true
+                    activity.viewDataBinding.muteUnmuteSelf.isChecked = true
                     activity.changedMuteSelf = false
                 } else {
-                    activity.mute_unmute_self.isChecked = true
+                    activity.viewDataBinding.muteUnmuteSelf.isChecked = true
                 }
             } else {
                 if (activity.changedMuteSelf) {
-                    activity.mute_unmute_self.isChecked = false
+                    activity.viewDataBinding.muteUnmuteSelf.isChecked = false
                     activity.changedMuteSelf = false
                 } else {
-                    activity.mute_unmute_self.isChecked = false
+                    activity.viewDataBinding.muteUnmuteSelf.isChecked = false
                 }
             }
         }
@@ -342,6 +267,10 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
     }
 
     override fun onArAnnotationNotesUpdate(arAnnotationObject: ArAnnotationObject) {
+        activity.runOnUiThread {
+            val arComment = arAnnotationObject.notes?.get(0)?.data
+            Toast.makeText(activity, arComment, Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun onArAnnotationPlaced(arAnnotationObject: ArAnnotationObject) {
@@ -371,97 +300,140 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
         activity.runOnUiThread {
             when (type) {
                 StreamingType.VIDEO_UPSTREAM -> {
-                    activity.swap_camera.visibility = View.VISIBLE
-                    activity.ocr_button.visibility = View.VISIBLE
-                    activity.qr_button.visibility = View.VISIBLE
+                    activity.viewDataBinding.swapCamera.visibility = View.VISIBLE
+                    activity.viewDataBinding.ocrButton.visibility = View.VISIBLE
+                    activity.viewDataBinding.qrButton.visibility = View.VISIBLE
 
                     if (LensSDK.isARMode()) {
-                        activity.zoom.visibility = View.VISIBLE
-                        activity.undo_annotation.visibility = View.VISIBLE
-                        activity.clear_all_annotation.visibility = View.VISIBLE
-                        activity.resolution.visibility = View.VISIBLE
+                        activity.viewDataBinding.zoom.visibility = View.VISIBLE
+                        activity.viewDataBinding.undoAnnotation.visibility = View.VISIBLE
+                        activity.viewDataBinding.clearAllAnnotation.visibility = View.VISIBLE
+                        activity.viewDataBinding.resolution.visibility = View.VISIBLE
 
                         LensSDK.setResolution(false)
-                        activity.resolution.text = "Non HD"
+                        activity.viewDataBinding.resolution.text = "Non HD"
                     }
 
-                    activity.video.visibility = View.VISIBLE
+                    activity.viewDataBinding.video.visibility = View.VISIBLE
 
-                    activity.zoom.isChecked = false
-                    activity.zoom_seekbar.visibility = View.GONE
+                    activity.viewDataBinding.zoom.isChecked = false
+                    activity.viewDataBinding.zoomSeekbar.visibility = View.GONE
 
-                    activity.share_camera.isChecked = true
-                    activity.share_camera.text = "Video Off"
-//                    activity.share_camera.isChecked = false
-                    activity.share_camera.visibility = View.VISIBLE
-                    activity.flash_light.visibility = View.GONE
+                    activity.viewDataBinding.shareCamera.text = "Video Off"
+                    activity.viewDataBinding.shareCamera.visibility = View.VISIBLE
+                    activity.viewDataBinding.flashLight.visibility = View.GONE
 
                     Handler(Looper.getMainLooper()).postDelayed({
                         if (LensSDK.getChatLetEnabled()) {
-                            activity.chat_button.visibility = View.VISIBLE
+                            activity.viewDataBinding.chatButton.visibility = View.VISIBLE
                         } else {
-                            activity.chat_button.visibility = View.GONE
+                            activity.viewDataBinding.chatButton.visibility = View.GONE
                         }
                     }, 5000)
+
+                    activity.isUpstream = true
+
+                    activity.viewDataBinding.annotation.isChecked = false
+                    if (LensSDK.isARMode()) {
+                        activity.viewDataBinding.annotation.visibility = View.VISIBLE
+                    } else {
+                        activity.viewDataBinding.annotation.visibility = View.GONE
+                    }
+                    activity.viewDataBinding.pointCloud.visibility = View.GONE
+                    activity.viewDataBinding.planeDetection.visibility = View.GONE
+                    activity.viewDataBinding.arrow.visibility = View.GONE
+                    activity.viewDataBinding.pencil.visibility = View.GONE
+                    activity.viewDataBinding.rectangle.visibility = View.GONE
+                    activity.viewDataBinding.ellipse.visibility = View.GONE
+                    activity.viewDataBinding.arPointer.visibility = View.GONE
+                    activity.viewDataBinding.arMeasure.visibility = View.GONE
+                    activity.viewDataBinding.arMeasureIcon.visibility = View.GONE
+                    activity.viewDataBinding.arMeasureCenterAnchor.visibility = View.GONE
                 }
                 StreamingType.VIDEO_DOWNSTREAM -> {
-                    activity.swap_camera.visibility = View.GONE
-                    activity.ocr_button.visibility = View.VISIBLE
-                    activity.qr_button.visibility = View.VISIBLE
-                    activity.zoom.visibility = View.GONE
-                    activity.video.visibility = View.VISIBLE
-                    activity.undo_annotation.visibility = View.GONE
-                    activity.clear_all_annotation.visibility = View.GONE
-                    activity.resolution.visibility = View.GONE
+                    activity.viewDataBinding.swapCamera.visibility = View.GONE
+                    activity.viewDataBinding.ocrButton.visibility = View.VISIBLE
+                    activity.viewDataBinding.qrButton.visibility = View.VISIBLE
+                    activity.viewDataBinding.zoom.visibility = View.GONE
+                    activity.viewDataBinding.video.visibility = View.VISIBLE
+                    activity.viewDataBinding.undoAnnotation.visibility = View.GONE
+                    activity.viewDataBinding.clearAllAnnotation.visibility = View.GONE
+                    activity.viewDataBinding.resolution.visibility = View.GONE
 
-                    activity.zoom.isChecked = false
-                    activity.zoom.visibility = View.GONE
-                    activity.zoom_seekbar.visibility = View.GONE
+                    activity.viewDataBinding.zoom.isChecked = false
+                    activity.viewDataBinding.zoom.visibility = View.GONE
+                    activity.viewDataBinding.zoomSeekbar.visibility = View.GONE
 
-                    activity.share_camera.isChecked = false
-                    activity.share_camera.text = "Video On"
-                    activity.share_camera.isChecked = false
-                    activity.share_camera.visibility = View.VISIBLE
+                    activity.viewDataBinding.shareCamera.text = "Video On"
+                    activity.viewDataBinding.shareCamera.isChecked = false
+                    activity.viewDataBinding.shareCamera.visibility = View.VISIBLE
 
                     Handler(Looper.getMainLooper()).postDelayed({
                         if (LensSDK.getChatLetEnabled()) {
-                            activity.chat_button.visibility = View.VISIBLE
+                            activity.viewDataBinding.chatButton.visibility = View.VISIBLE
                         } else {
-                            activity.chat_button.visibility = View.GONE
+                            activity.viewDataBinding.chatButton.visibility = View.GONE
                         }
                         if (LensSDK.getFlashSupportEnabled()) {
-                            activity.flash_light.visibility = View.VISIBLE
+                            activity.viewDataBinding.flashLight.visibility = View.VISIBLE
                         } else {
-                            activity.flash_light.visibility = View.GONE
+                            activity.viewDataBinding.flashLight.visibility = View.GONE
                         }
                     }, 5000)
 
+                    activity.isUpstream = false
+
+                    activity.viewDataBinding.annotation.visibility = View.VISIBLE
+                    activity.viewDataBinding.annotation.isChecked = false
+                    activity.viewDataBinding.pointCloud.visibility = View.GONE
+                    activity.viewDataBinding.planeDetection.visibility = View.GONE
+                    activity.viewDataBinding.arrow.visibility = View.GONE
+                    activity.viewDataBinding.pencil.visibility = View.GONE
+                    activity.viewDataBinding.rectangle.visibility = View.GONE
+                    activity.viewDataBinding.ellipse.visibility = View.GONE
+                    activity.viewDataBinding.arPointer.visibility = View.GONE
+                    activity.viewDataBinding.arMeasure.visibility = View.GONE
+                    activity.viewDataBinding.arMeasureIcon.visibility = View.GONE
+                    activity.viewDataBinding.arMeasureCenterAnchor.visibility = View.GONE
                 }
                 StreamingType.NO_ONE_IS_STREAMING -> {
-                    activity.swap_camera.visibility = View.GONE
-                    activity.resolution.visibility = View.GONE
-                    activity.ocr_button.visibility = View.GONE
-                    activity.qr_button.visibility = View.GONE
-                    activity.zoom.visibility = View.GONE
-                    activity.video.visibility = View.GONE
-                    activity.zoom_seekbar.visibility = View.GONE
-                    activity.undo_annotation.visibility = View.GONE
-                    activity.clear_all_annotation.visibility = View.GONE
-                    activity.flash_light.visibility = View.GONE
-                    activity.resolution.visibility = View.GONE
+                    activity.viewDataBinding.swapCamera.visibility = View.GONE
+                    activity.viewDataBinding.resolution.visibility = View.GONE
+                    activity.viewDataBinding.ocrButton.visibility = View.GONE
+                    activity.viewDataBinding.qrButton.visibility = View.GONE
+                    activity.viewDataBinding.zoom.visibility = View.GONE
+                    activity.viewDataBinding.video.visibility = View.GONE
+                    activity.viewDataBinding.zoomSeekbar.visibility = View.GONE
+                    activity.viewDataBinding.undoAnnotation.visibility = View.GONE
+                    activity.viewDataBinding.clearAllAnnotation.visibility = View.GONE
+                    activity.viewDataBinding.flashLight.visibility = View.GONE
 
-                    activity.share_camera.isChecked = false
-                    activity.share_camera.text = "Video On"
-                    activity.share_camera.isChecked = false
-                    activity.share_camera.visibility = View.VISIBLE
+                    activity.viewDataBinding.shareCamera.text = "Video On"
+                    activity.viewDataBinding.shareCamera.isChecked = false
+                    activity.viewDataBinding.shareCamera.visibility = View.VISIBLE
 
                     Handler(Looper.getMainLooper()).postDelayed({
                         if (LensSDK.getChatLetEnabled()) {
-                            activity.chat_button.visibility = View.VISIBLE
+                            activity.viewDataBinding.chatButton.visibility = View.VISIBLE
                         } else {
-                            activity.chat_button.visibility = View.GONE
+                            activity.viewDataBinding.chatButton.visibility = View.GONE
                         }
                     }, 5000)
+
+                    activity.isUpstream = false
+
+                    activity.viewDataBinding.annotation.visibility = View.GONE
+                    activity.viewDataBinding.annotation.isChecked = false
+                    activity.viewDataBinding.pointCloud.visibility = View.GONE
+                    activity.viewDataBinding.planeDetection.visibility = View.GONE
+                    activity.viewDataBinding.arrow.visibility = View.GONE
+                    activity.viewDataBinding.pencil.visibility = View.GONE
+                    activity.viewDataBinding.rectangle.visibility = View.GONE
+                    activity.viewDataBinding.ellipse.visibility = View.GONE
+                    activity.viewDataBinding.arPointer.visibility = View.GONE
+                    activity.viewDataBinding.arMeasure.visibility = View.GONE
+                    activity.viewDataBinding.arMeasureIcon.visibility = View.GONE
+                    activity.viewDataBinding.arMeasureCenterAnchor.visibility = View.GONE
                 }
             }
         }
@@ -482,11 +454,11 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
             when (feature) {
                 Feature.FREEZE_CAMERA_STREAM -> {
                     activity.isMuteVideo = false
-                    activity.video.isChecked = false
+                    activity.viewDataBinding.video.isChecked = false
                 }
                 Feature.SHARE_CAMERA -> {
-                    activity.share_camera.text = "Video Off"
-                    activity.share_camera.isChecked = true
+                    activity.viewDataBinding.shareCamera.text = "Video Off"
+                    activity.viewDataBinding.shareCamera.isChecked = true
                 }
                 else -> {
 
@@ -502,15 +474,15 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
     override fun onFlashLightOff(flashSupportStatus: FlashSupportStatus, displayName: String?) {
         when (flashSupportStatus) {
             FlashSupportStatus.SUCCESS -> {
-                activity.flash_light.isChecked = false
-                activity.flash_light.text = "Flash On"
+                activity.viewDataBinding.flashLight.isChecked = false
+                activity.viewDataBinding.flashLight.text = "Flash On"
                 activity.runOnUiThread {
                     Toast.makeText(activity, "$displayName has turned off Flashlight", Toast.LENGTH_LONG).show()
                 }
             }
             FlashSupportStatus.FAILED -> {
-                activity.flash_light.isChecked = true
-                activity.flash_light.text = "Flash Off"
+                activity.viewDataBinding.flashLight.isChecked = true
+                activity.viewDataBinding.flashLight.text = "Flash Off"
                 activity.runOnUiThread {
                     Toast.makeText(activity, "Unable to turn off Flashlight. Try again.", Toast.LENGTH_LONG).show()
                 }
@@ -521,15 +493,15 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
     override fun onFlashLightOn(flashSupportStatus: FlashSupportStatus, displayName: String?) {
         when (flashSupportStatus) {
             FlashSupportStatus.SUCCESS -> {
-                activity.flash_light.isChecked = true
-                activity.flash_light.text = "Flash Off"
+                activity.viewDataBinding.flashLight.isChecked = true
+                activity.viewDataBinding.flashLight.text = "Flash Off"
                 activity.runOnUiThread {
                     Toast.makeText(activity, "$displayName has turned on Flashlight", Toast.LENGTH_LONG).show()
                 }
             }
             FlashSupportStatus.FAILED -> {
-                activity.flash_light.isChecked = false
-                activity.flash_light.text = "Flash On"
+                activity.viewDataBinding.flashLight.isChecked = false
+                activity.viewDataBinding.flashLight.text = "Flash On"
                 activity.runOnUiThread {
                     Toast.makeText(activity, "Unable to turn on Flashlight. Try again.", Toast.LENGTH_LONG).show()
                 }
@@ -546,13 +518,27 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
             FreezeActions.FREEZE_SNAPSHOT_DOWNLOADED,FreezeActions.FREEZE_SNAPSHOT_SELF -> {
                 activity.runOnUiThread {
                     activity.isMuteVideo = true
-                    activity.video.isChecked = true
+                    activity.viewDataBinding.video.isChecked = true
+
+                    activity.viewDataBinding.zoom.visibility = View.GONE
+                    activity.viewDataBinding.resolution.visibility = View.GONE
+                    activity.viewDataBinding.annotation.visibility = View.GONE
+                    activity.viewDataBinding.undoAnnotation.visibility = View.GONE
+                    activity.viewDataBinding.clearAllAnnotation.visibility = View.GONE
                 }
             }
             FreezeActions.UNFREEZE_SNAPSHOT, FreezeActions.UNFREEZE_VIDEO, FreezeActions.UNFREEZE_SNAPSHOT_SELF -> {
                 activity.runOnUiThread {
                     activity.isMuteVideo = false
-                    activity.video.isChecked = false
+                    activity.viewDataBinding.video.isChecked = false
+
+                    if (LensSDK.isARMode()) {
+                        activity.viewDataBinding.zoom.visibility = View.VISIBLE
+                        activity.viewDataBinding.resolution.visibility = View.VISIBLE
+                        activity.viewDataBinding.annotation.visibility = View.VISIBLE
+                        activity.viewDataBinding.undoAnnotation.visibility = View.VISIBLE
+                        activity.viewDataBinding.clearAllAnnotation.visibility = View.VISIBLE
+                    }
                 }
             }
             FreezeActions.FREEZE_SNAPSHOT_DOWNLOAD_FAILED -> {
@@ -571,20 +557,23 @@ class SessionCallbacks(private val activity: LensSample) : ISessionCallback {
      */
     override fun onCameraSwapDone(isFrontCamera: Boolean) {
         activity.runOnUiThread {
-            if (LensSDK.isARMode() && !isFrontCamera) {
-                activity.zoom.visibility = View.VISIBLE
+            activity.viewDataBinding.zoom.isChecked = false
+            activity.viewDataBinding.zoomSeekbar.visibility = View.GONE
 
-                activity.clear_all_annotation.visibility = View.VISIBLE
-                activity.undo_annotation.visibility = View.VISIBLE
+            if (isFrontCamera) {
+                activity.viewDataBinding.zoom.visibility = View.GONE
+                activity.viewDataBinding.resolution.visibility = View.GONE
+                activity.viewDataBinding.annotation.visibility = View.GONE
+                activity.viewDataBinding.undoAnnotation.visibility = View.GONE
+                activity.viewDataBinding.clearAllAnnotation.visibility = View.GONE
             } else {
-                activity.zoom.visibility = View.GONE
-
-                activity.clear_all_annotation.visibility = View.GONE
-                activity.undo_annotation.visibility = View.GONE
+                activity.viewDataBinding.zoom.visibility = View.VISIBLE
+                activity.viewDataBinding.resolution.visibility = View.VISIBLE
+                activity.viewDataBinding.annotation.visibility = View.VISIBLE
+                activity.viewDataBinding.undoAnnotation.visibility = View.VISIBLE
+                activity.viewDataBinding.clearAllAnnotation.visibility = View.VISIBLE
             }
 
-            activity.zoom.isChecked = false
-            activity.zoom_seekbar.visibility = View.GONE
             LensSDK.setZoomPercentage(0f)
         }
     }

@@ -8,18 +8,14 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.webkit.WebView
 import android.widget.FrameLayout
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.zoho.lens.LensSDK
 import com.zoho.lens.chatLet.ChatLetState
-import kotlinx.android.synthetic.main.fragment_chatlet.chat_layout
-import kotlinx.android.synthetic.main.fragment_chatlet.close_chat
-import kotlinx.android.synthetic.main.fragment_chatlet.lottieImage
-import kotlinx.android.synthetic.main.fragment_chatlet.refresh_chat
-import kotlinx.android.synthetic.main.fragment_chatlet.retry_layout
+import com.zoho.lens.demo.databinding.FragmentChatletBinding
 
 
 /**
@@ -30,19 +26,21 @@ import kotlinx.android.synthetic.main.fragment_chatlet.retry_layout
 
 class ChatFragment : BottomSheetDialogFragment() {
     var chatLetState = MutableLiveData<ChatLetState>()
+    private lateinit var viewDataBinding: FragmentChatletBinding
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val bottomSheetDialog = super.onCreateDialog(savedInstanceState) as BottomSheetDialog
         bottomSheetDialog.setOnShowListener { dialog ->
             val d = dialog as BottomSheetDialog
-            val bottomSheet = d.findViewById<View>(R.id.design_bottom_sheet) as FrameLayout?
+            val bottomSheet = d.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet) as FrameLayout?
             BottomSheetBehavior.from<FrameLayout?>(bottomSheet!!).state = BottomSheetBehavior.STATE_EXPANDED
         }
         return bottomSheetDialog
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_chatlet, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        viewDataBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_chatlet, container, true)
+        return viewDataBinding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -58,43 +56,46 @@ class ChatFragment : BottomSheetDialogFragment() {
          * LensSDK.attachFileCallBackForChat(uris.toTypedArray()) or LensSDK.attachFileCallBackForChat(null) **/
 
 
-        chatLetState.observe(viewLifecycleOwner, Observer {
-            when (it) {
+        chatLetState.observe(viewLifecycleOwner) { state ->
+            when (state) {
                 ChatLetState.LOADING -> {
-                    lottieImage.visibility = View.VISIBLE
-                    chat_layout.visibility = View.GONE
-                    retry_layout.visibility = View.GONE
+                    viewDataBinding.lottieImage.visibility = View.VISIBLE
+                    viewDataBinding.chatLayout.visibility = View.GONE
+                    viewDataBinding.retryLayout.visibility = View.GONE
                 }
 
                 ChatLetState.SUCCESS -> {
-                    chat_layout.visibility = View.VISIBLE
-                    lottieImage.visibility = View.GONE
-                    retry_layout.visibility = View.GONE
+                    viewDataBinding.chatLayout.visibility = View.VISIBLE
+                    viewDataBinding.lottieImage.visibility = View.GONE
+                    viewDataBinding.retryLayout.visibility = View.GONE
                 }
 
                 ChatLetState.ERROR -> {
-                    lottieImage.visibility = View.GONE
-                    chat_layout.visibility = View.GONE
-                    retry_layout.visibility = View.VISIBLE
+                    viewDataBinding.lottieImage.visibility = View.GONE
+                    viewDataBinding.chatLayout.visibility = View.GONE
+                    viewDataBinding.retryLayout.visibility = View.VISIBLE
+                }
+                else -> {
+
                 }
             }
-        })
+        }
         /**Remove the Views from chat_webview before adding the new chat view (onDestroyView())*/
-        chat_layout.addView(LensSDK.getChatLetView())
-        retry_layout.setOnClickListener {
+        viewDataBinding.chatLayout.addView(LensSDK.getChatLetView())
+        viewDataBinding.retryLayout.setOnClickListener {
             LensSDK.refreshChatLet()
         }
-        refresh_chat.setOnClickListener {
+        viewDataBinding.refreshChat.setOnClickListener {
             LensSDK.refreshChatLet()
         }
-        close_chat.setOnClickListener {
+        viewDataBinding.closeChat.setOnClickListener {
             dismiss()
         }
     }
 
     override fun onDestroyView() {
         /**Removing the old view before it gets destroyed*/
-        chat_layout.removeAllViews()
+        viewDataBinding.chatLayout.removeAllViews()
         super.onDestroyView()
 
     }

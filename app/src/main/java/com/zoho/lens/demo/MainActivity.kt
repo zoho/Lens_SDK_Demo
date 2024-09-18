@@ -13,60 +13,60 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.databinding.DataBindingUtil
 import com.zoho.lens.LensSDK
-import kotlinx.android.synthetic.main.activity_main.ar_support
-import kotlinx.android.synthetic.main.activity_main.baseurl_edittext
-import kotlinx.android.synthetic.main.activity_main.key_edittext
-import kotlinx.android.synthetic.main.activity_main.ok_button
+import com.zoho.lens.demo.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
     private var isAR: Boolean = false
-    var TAG = MainActivity::class.java.canonicalName as String
     private lateinit var dialog: AlertDialog
-    var DEFAULT_SESSION_KEY = "371007523"
+    private var defaultSessionKey = "371007523"
 
-    val CAMERA_PERMISSION = Manifest.permission.CAMERA
-    val REC_AUDIO_PERMISSION = Manifest.permission.RECORD_AUDIO
-    val READ_PHONE_STATE_PERMISSION = Manifest.permission.READ_PHONE_STATE
+    private val cameraManifestPermission = Manifest.permission.CAMERA
+    private val recordAudioPermission = Manifest.permission.RECORD_AUDIO
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    val POST_NOTIFICATIONS = Manifest.permission.POST_NOTIFICATIONS
+    val postNotifications = Manifest.permission.POST_NOTIFICATIONS
+
     @RequiresApi(Build.VERSION_CODES.S)
-    val BLUETOOTH_CONNECT = Manifest.permission.BLUETOOTH_CONNECT
+    val bluetoothConnect = Manifest.permission.BLUETOOTH_CONNECT
 
     var cameraPermission = false
     var micPermission = false
+    lateinit var viewDataBinding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+
+        viewDataBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+
         val edittext = findViewById<EditText>(R.id.key_edittext)
+        edittext.setText(defaultSessionKey)
 
-        edittext.setText(DEFAULT_SESSION_KEY)
-
-        ar_support.setOnCheckedChangeListener { _, isChecked ->
+        viewDataBinding.arSupport.setOnCheckedChangeListener { _, isChecked ->
             isAR =  isChecked
         }
 
-        ok_button.setOnClickListener {
+        viewDataBinding.okButton.setOnClickListener {
             val intent = Intent(this@MainActivity, LensSample::class.java)
-            intent.putExtra("sessionKey", key_edittext.text.toString())
-            intent.putExtra("baseUrl", baseurl_edittext.text.toString())
+            intent.putExtra("sessionKey", viewDataBinding.keyEdittext.text.toString())
+            intent.putExtra("baseUrl", viewDataBinding.baseurlEdittext.text.toString())
             intent.putExtra("isAR", isAR)
             startActivity(intent)
         }
 
         val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            arrayOf(CAMERA_PERMISSION, REC_AUDIO_PERMISSION, POST_NOTIFICATIONS, BLUETOOTH_CONNECT)
+            arrayOf(cameraManifestPermission, recordAudioPermission, postNotifications, bluetoothConnect)
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            arrayOf(CAMERA_PERMISSION, REC_AUDIO_PERMISSION, BLUETOOTH_CONNECT)
+            arrayOf(cameraManifestPermission, recordAudioPermission, bluetoothConnect)
         } else {
-            arrayOf(CAMERA_PERMISSION, REC_AUDIO_PERMISSION)
+            arrayOf(cameraManifestPermission, recordAudioPermission)
         }
 
         val permissionsToRequest = permissions.filter {
-            if (it == CAMERA_PERMISSION && ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED) {
+            if (it == cameraManifestPermission && ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED) {
                 cameraPermission = true
             }
-            if (it == REC_AUDIO_PERMISSION && ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED) {
+            if (it == recordAudioPermission && ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED) {
                 micPermission = true
             }
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED

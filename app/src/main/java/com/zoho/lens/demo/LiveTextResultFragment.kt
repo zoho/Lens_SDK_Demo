@@ -5,13 +5,10 @@ import android.text.util.Linkify
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.zoho.lens.LensSDK
-import kotlinx.android.synthetic.main.fragment_ocr_result.cancelOcrResult
-import kotlinx.android.synthetic.main.fragment_ocr_result.link_warning_container
-import kotlinx.android.synthetic.main.fragment_ocr_result.ocrEditText
-import kotlinx.android.synthetic.main.fragment_ocr_result.ocr_send_button
-import kotlinx.android.synthetic.main.fragment_ocr_result.qr_text_view
+import com.zoho.lens.demo.databinding.FragmentOcrResultBinding
 
 
 /**
@@ -21,8 +18,10 @@ import kotlinx.android.synthetic.main.fragment_ocr_result.qr_text_view
 
 
 class LiveTextResultFragment(private val scanType: ScanType) : BottomSheetDialogFragment() {
+    private lateinit var viewDataBinding: FragmentOcrResultBinding
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_ocr_result, container, false)
+        viewDataBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_ocr_result, container, false)
+        return viewDataBinding.root
     }
 
 
@@ -36,13 +35,13 @@ class LiveTextResultFragment(private val scanType: ScanType) : BottomSheetDialog
 
         when (scanType) {
             ScanType.OCR -> {
-                qr_text_view.visibility = View.GONE
-                link_warning_container.visibility = View.GONE
-                ocrEditText.visibility = View.VISIBLE
-                ocrEditText.isFocusable = true
-                ocrEditText.isFocusableInTouchMode = true
-                ocrEditText.isClickable = true
-                ocrEditText.linksClickable = false
+                viewDataBinding.qrTextView.visibility = View.GONE
+                viewDataBinding.linkWarningContainer.visibility = View.GONE
+                viewDataBinding.ocrEditText.visibility = View.VISIBLE
+                viewDataBinding.ocrEditText.isFocusable = true
+                viewDataBinding.ocrEditText.isFocusableInTouchMode = true
+                viewDataBinding.ocrEditText.isClickable = true
+                viewDataBinding.ocrEditText.linksClickable = false
 
                 if (message != null) {
                     setResultText(message)
@@ -50,32 +49,32 @@ class LiveTextResultFragment(private val scanType: ScanType) : BottomSheetDialog
             }
 
             ScanType.QR -> {
-                ocrEditText.visibility = View.GONE
-                qr_text_view.visibility = View.VISIBLE
-                qr_text_view.isClickable = true
-                qr_text_view.linksClickable = true
-                qr_text_view.autoLinkMask = Linkify.ALL
+                viewDataBinding.ocrEditText.visibility = View.GONE
+                viewDataBinding.qrTextView.visibility = View.VISIBLE
+                viewDataBinding.qrTextView.isClickable = true
+                viewDataBinding.qrTextView.linksClickable = true
+                viewDataBinding.qrTextView.autoLinkMask = Linkify.ALL
 
                 if (message != null) {
                     setResultText(message)
                 }
 
-                qr_text_view.post {
+                viewDataBinding.qrTextView.post {
                     // Check if URLs are available after result text has been set
-                    if (qr_text_view.urls.isNotEmpty()) {
-                        link_warning_container.visibility = View.VISIBLE
+                    if (viewDataBinding.qrTextView.urls.isNotEmpty()) {
+                        viewDataBinding.linkWarningContainer.visibility = View.VISIBLE
                     } else {
-                        link_warning_container.visibility = View.GONE
+                        viewDataBinding.linkWarningContainer.visibility = View.GONE
                     }
                 }
             }
         }
 
-        cancelOcrResult.setOnClickListener {
+        viewDataBinding.cancelOcrResult.setOnClickListener {
             dismiss()
         }
 
-        ocr_send_button.setOnClickListener {
+        viewDataBinding.ocrSendButton.setOnClickListener {
             val chatMessage = getResultText().trim()
             if (LensSDK.getChatLetEnabled()) {
                 LensSDK.sendMessageThroughChatLet(chatMessage)
@@ -90,11 +89,11 @@ class LiveTextResultFragment(private val scanType: ScanType) : BottomSheetDialog
     private fun setResultText(text: String) {
         when (scanType) {
             ScanType.OCR -> {
-                ocrEditText.setText(text)
+                viewDataBinding.ocrEditText.setText(text)
             }
 
             ScanType.QR -> {
-                qr_text_view.text = text
+                viewDataBinding.qrTextView.text = text
             }
         }
     }
@@ -102,11 +101,11 @@ class LiveTextResultFragment(private val scanType: ScanType) : BottomSheetDialog
     private fun getResultText(): String {
         return when (scanType) {
             ScanType.OCR -> {
-                ocrEditText.text.toString()
+                viewDataBinding.ocrEditText.text.toString()
             }
 
             ScanType.QR -> {
-                qr_text_view.text.toString()
+                viewDataBinding.qrTextView.text.toString()
             }
         }
     }

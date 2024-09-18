@@ -1,81 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical"
-    tools:context=".MainActivity">
+<layout>
 
-    <ScrollView
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        tools:context=".MainActivity">
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="30dp">
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textField"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:hint="Session Key">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/key_edittext"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="number"
-                    tools:ignore="TextFields" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:hint="Base URL">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/baseurl_edittext"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="https://lens.zoho.com"
-                    android:layout_marginBottom="20dp" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/ar_support"
-                style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="fill"
-                android:layout_margin="0dp"
-                android:text="AR Support" />
+            android:layout_height="wrap_content">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="end"
-                android:orientation="horizontal">
+                android:orientation="vertical"
+                android:padding="30dp">
 
-                <Button
-                    android:id="@+id/ok_button"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:hint="Session Key">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/key_edittext"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        tools:ignore="TextFields" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:hint="Base URL">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/baseurl_edittext"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:text="https://lens.zoho.com" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/ar_support"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:text="Start"
-                    tools:ignore="HardcodedText" />
+                    android:layout_gravity="fill"
+                    android:layout_margin="0dp"
+                    android:text="AR Support" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/ok_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:text="Start"
+                        tools:ignore="HardcodedText" />
+                </LinearLayout>
+
             </LinearLayout>
 
-        </LinearLayout>
 
+        </ScrollView>
 
-    </ScrollView>
+    </LinearLayout>
 
-</LinearLayout>
+</layout>
 
     <!-- $Id$ -->

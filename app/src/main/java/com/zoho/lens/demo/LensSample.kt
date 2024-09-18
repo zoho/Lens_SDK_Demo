@@ -14,32 +14,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProviders
-import com.zoho.lens.AudioDevice
+import com.example.arcore_assistrtc.enums.NodeType
+import com.example.arcore_assistrtc.enums.TrackingFailureReason
+import com.zoho.canvasview.AnnotationType
+import com.zoho.lens.ARAnchorPlacedListenerForCustomer
 import com.zoho.lens.LensSDK
 import com.zoho.lens.UserInfo
 import com.zoho.lens.chatLet.ChatLetState
 import com.zoho.lens.demo.databinding.ActivityLensBinding
 import com.zoho.lens.handler.QRHandler
-import kotlinx.android.synthetic.main.activity_lens.chat_button
-import kotlinx.android.synthetic.main.activity_lens.clear_all_annotation
-import kotlinx.android.synthetic.main.activity_lens.close
-import kotlinx.android.synthetic.main.activity_lens.flash_light
-import kotlinx.android.synthetic.main.activity_lens.green
-import kotlinx.android.synthetic.main.activity_lens.mute_unmute_self
-import kotlinx.android.synthetic.main.activity_lens.ocr_button
-import kotlinx.android.synthetic.main.activity_lens.orange
-import kotlinx.android.synthetic.main.activity_lens.qr_button
-import kotlinx.android.synthetic.main.activity_lens.red
-import kotlinx.android.synthetic.main.activity_lens.resolution
-import kotlinx.android.synthetic.main.activity_lens.share_camera
-import kotlinx.android.synthetic.main.activity_lens.speaker
-import kotlinx.android.synthetic.main.activity_lens.stream_view
-import kotlinx.android.synthetic.main.activity_lens.swap_camera
-import kotlinx.android.synthetic.main.activity_lens.undo_annotation
-import kotlinx.android.synthetic.main.activity_lens.video
-import kotlinx.android.synthetic.main.activity_lens.yellow
-import kotlinx.android.synthetic.main.activity_lens.zoom
-import kotlinx.android.synthetic.main.activity_lens.zoom_seekbar
+import com.zoho.webrtc.AppRTCAudioManager
 
 
 class LensSample : AppCompatActivity() {
@@ -51,8 +35,8 @@ class LensSample : AppCompatActivity() {
     val chatLetState = MutableLiveData<ChatLetState>()
     private lateinit var liveTextResultFragment: LiveTextResultFragment
     var isMuteVideo = false
-    var flashStatus = false
-
+    lateinit var viewDataBinding: ActivityLensBinding
+    var isUpstream = true
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return super.onSupportNavigateUp()
@@ -62,12 +46,7 @@ class LensSample : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         LensSDK.onCreate(this)
-        val viewDataBinding = DataBindingUtil.setContentView<ActivityLensBinding>(this, R.layout.activity_lens)
-        val result = viewDataBinding.setVariable(BR.viewmodel, ViewModelProviders.of(this)[LensViewModel::class.java])
-        if (!result) {
-            throw RuntimeException("ViewModel variable not set. Check the types")
-        }
-        viewDataBinding.executePendingBindings()
+        viewDataBinding = DataBindingUtil.setContentView(this, R.layout.activity_lens)
 
         var isAR = false
         sessionKey = intent.getStringExtra("sessionKey")
@@ -89,13 +68,14 @@ class LensSample : AppCompatActivity() {
         LensSDK.setCallbackListener(SessionCallbacks(this))
             //Optional, Set whether the AR mode enable or disable for .
             .setARMode(isAR)
-            //Optional,  Enable or disable high quality resolution for AR session
-            .setResolution(false)
             /**
              * Set the current best knowledge of a real-world planar surface and detect the objects.
              */
             // To add the rendering  view to display local and remote views
-            .addStreamingView(stream_view)
+            .addStreamingView(viewDataBinding.streamView)
+            //Optional,  Enable or disable high quality resolution for AR session
+            .setPointCloud(false)
+            .setPlaneDetection(false)
             //Optional,  Update customer info
             .setUserInfo(UserInfo(userName ,mailId))
             //  session key to start the valid session
@@ -103,33 +83,38 @@ class LensSample : AppCompatActivity() {
             //  Required, Set the authToken to be used for technician validation
             .startSession(sessionKey = sessionKey, baseUrl= baseUrl)
 
+        if (!LensSDK.isARMode()) {
+            viewDataBinding.zoom.visibility = View.GONE
+            viewDataBinding.undoAnnotation.visibility = View.GONE
+            viewDataBinding.clearAllAnnotation.visibility = View.GONE
+        }
 
-        red.setOnClickListener {
+        viewDataBinding.red.setOnClickListener {
             LensSDK.setAnnotationColor("#FF0000")
         }
 
-        green.setOnClickListener {
+        viewDataBinding.green.setOnClickListener {
             LensSDK.setAnnotationColor("#008000")
         }
 
-        yellow.setOnClickListener {
+        viewDataBinding.yellow.setOnClickListener {
             LensSDK.setAnnotationColor("#FFFF00")
         }
 
-        orange.setOnClickListener {
+        viewDataBinding.orange.setOnClickListener {
             LensSDK.setAnnotationColor("#00FF00")
         }
 
-        swap_camera.setOnClickListener {
+        viewDataBinding.swapCamera.setOnClickListener {
             LensSDK.onSwapCamera()
         }
 
-        close.setOnClickListener {
+        viewDataBinding.close.setOnClickListener {
             LensSDK.closeSession()
             onClosedSession()
         }
 
-        mute_unmute_self.setOnCheckedChangeListener { _, isChecked ->
+        viewDataBinding.muteUnmuteSelf.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 changedMuteSelf = true
                 LensSDK.muteAudio(true)
@@ -139,76 +124,71 @@ class LensSample : AppCompatActivity() {
             }
         }
 
-        speaker.setOnCheckedChangeListener { _, isChecked ->
+        viewDataBinding.speaker.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 //speaker on
-                LensSDK.switchAudioMode(AudioDevice.SPEAKER_PHONE)
+                LensSDK.switchAudioMode(AppRTCAudioManager.AudioDevice.SPEAKER_PHONE)
             } else {
-                LensSDK.switchAudioMode(AudioDevice.EARPIECE)
+                LensSDK.switchAudioMode(AppRTCAudioManager.AudioDevice.EARPIECE)
             }
         }
 
-        video.setOnClickListener {
+        viewDataBinding.video.setOnClickListener {
             isMuteVideo = !isMuteVideo
-            LensSDK.muteVideo(isMuteVideo)
+            LensSDK.onFreezeUnfreezeVideo(isMuteVideo)
         }
 
-        ocr_button.setOnClickListener {
+        viewDataBinding.ocrButton.setOnClickListener {
             LensSDK.requestOCR()
         }
 
-        qr_button.setOnClickListener {
+        viewDataBinding.qrButton.setOnClickListener {
             LensSDK.requestQR(isSilent = false, shouldContinuouslyRetry = QRHandler.RetryMode.RETRY_CONTINOUSLY)
         }
 
-        share_camera.setOnClickListener {
-            if (share_camera.isChecked) {
+        viewDataBinding.shareCamera.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
                 LensSDK.shareCameraRequest()
             } else {
                 LensSDK.stopCameraRequest()
             }
         }
 
-        zoom.setOnCheckedChangeListener { _, isChecked ->
+        viewDataBinding.zoom.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                zoom_seekbar.visibility = View.VISIBLE
+                viewDataBinding.zoomSeekbar.visibility = View.VISIBLE
             } else {
-                zoom_seekbar.visibility = View.GONE
+                viewDataBinding.zoomSeekbar.visibility = View.GONE
             }
         }
 
-        undo_annotation.setOnClickListener {
+        viewDataBinding.undoAnnotation.setOnClickListener {
             LensSDK.undoAnnotation()
         }
 
-        clear_all_annotation.setOnClickListener {
+        viewDataBinding.clearAllAnnotation.setOnClickListener {
             LensSDK.clearAllAnnotations()
         }
 
-        flash_light.setOnClickListener {
-            if (flashStatus) {
-                LensSDK.setFlashOff()
-            } else {
-                LensSDK.setFlashOn()
-            }
-
+        viewDataBinding.flashLight.setOnClickListener {
+            LensSDK.setFlashOnOff()
         }
 
-        resolution.setOnClickListener {
+        viewDataBinding.resolution.setOnClickListener {
             LensSDK.setResolution(!LensSDK.getResolution())
             if (LensSDK.getResolution()) {
-                resolution.text = "HD"
+                viewDataBinding.resolution.text = "HD"
             } else {
-                resolution.text = "Non HD"
+                viewDataBinding.resolution.text = "Non HD"
             }
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            zoom_seekbar.min = 0
+            viewDataBinding.zoomSeekbar.min = 0
         }
 
-        zoom_seekbar.max = 100
-        zoom_seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        viewDataBinding.zoomSeekbar.max = 100
+        viewDataBinding.zoomSeekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 LensSDK.setZoomPercentage(progress.toFloat()/100f)
             }
@@ -218,24 +198,147 @@ class LensSample : AppCompatActivity() {
             override fun onStopTrackingTouch(seekBar: SeekBar?) { }
         })
 
-        chat_button.setOnClickListener {
+        viewDataBinding.chatButton.setOnClickListener {
             if (!chatFragment.isAdded) {
                 chatFragment.show(supportFragmentManager, "Chat")
             }
+        }
+
+        viewDataBinding.annotation.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                viewDataBinding.annotationScrollView.visibility = View.VISIBLE
+                if (isUpstream) {
+                    if (LensSDK.isARMode()) {
+                        viewDataBinding.arrow.visibility = View.VISIBLE
+                        viewDataBinding.pencil.visibility = View.VISIBLE
+                        viewDataBinding.arPointer.visibility = View.VISIBLE
+                        viewDataBinding.arMeasure.visibility = View.VISIBLE
+                    } else {
+                        viewDataBinding.pointCloud.visibility = View.GONE
+                        viewDataBinding.planeDetection.visibility = View.GONE
+                        viewDataBinding.arrow.visibility = View.GONE
+                        viewDataBinding.pencil.visibility = View.GONE
+                        viewDataBinding.arPointer.visibility = View.GONE
+                        viewDataBinding.arMeasure.visibility = View.GONE
+                        viewDataBinding.arMeasureIcon.visibility = View.GONE
+                        viewDataBinding.arMeasureCenterAnchor.visibility = View.GONE
+                    }
+                    viewDataBinding.rectangle.visibility = View.GONE
+                    viewDataBinding.ellipse.visibility = View.GONE
+                } else {
+                    viewDataBinding.pointCloud.visibility = View.GONE
+                    viewDataBinding.planeDetection.visibility = View.GONE
+                    if (LensSDK.isARMode()) {
+                        viewDataBinding.arrow.visibility = View.VISIBLE
+                        viewDataBinding.arPointer.visibility = View.VISIBLE
+                        viewDataBinding.arMeasure.visibility = View.GONE
+                        viewDataBinding.arMeasureIcon.visibility = View.GONE
+                        viewDataBinding.arMeasureCenterAnchor.visibility = View.GONE
+                    }
+                    viewDataBinding.pencil.visibility = View.VISIBLE
+                    viewDataBinding.rectangle.visibility = View.VISIBLE
+                    viewDataBinding.ellipse.visibility = View.VISIBLE
+                }
+            } else {
+                viewDataBinding.annotationScrollView.visibility = View.GONE
+            }
+        }
+
+        viewDataBinding.arrow.setOnClickListener {
+            if (LensSDK.isARMode()) {
+                LensSDK.setArDrawingStyle(NodeType.ARROW)
+            }
+            LensSDK.setAnnotationDrawStyle(AnnotationType.ARROW, "#FF004E", 5f)
+            viewDataBinding.arMeasureIcon.visibility = View.GONE
+            viewDataBinding.arMeasureCenterAnchor.visibility = View.GONE
+        }
+
+        viewDataBinding.pencil.setOnClickListener {
+            if (LensSDK.isARMode()) {
+                LensSDK.setArDrawingStyle(NodeType.PENCIL)
+            }
+            LensSDK.setAnnotationDrawStyle(AnnotationType.PENCIL, "#FF004E", 5f)
+            viewDataBinding.arMeasureIcon.visibility = View.GONE
+            viewDataBinding.arMeasureCenterAnchor.visibility = View.GONE
+        }
+
+        viewDataBinding.rectangle.setOnClickListener {
+            if (LensSDK.isARMode()) {
+                LensSDK.setArDrawingStyle(NodeType.RECTANGLE)
+            }
+            LensSDK.setAnnotationDrawStyle(AnnotationType.RECTANGLE, "#FF004E", 5f)
+            viewDataBinding.arMeasureIcon.visibility = View.GONE
+            viewDataBinding.arMeasureCenterAnchor.visibility = View.GONE
+        }
+
+        viewDataBinding.ellipse.setOnClickListener {
+            if (LensSDK.isARMode()) {
+                LensSDK.setArDrawingStyle(NodeType.ELLIPSE)
+            }
+            LensSDK.setAnnotationDrawStyle(AnnotationType.ELLIPSE, "#FF004E", 5f)
+            viewDataBinding.arMeasureIcon.visibility = View.GONE
+            viewDataBinding.arMeasureCenterAnchor.visibility = View.GONE
+        }
+
+        viewDataBinding.arMeasure.setOnClickListener {
+            LensSDK.setArDrawingStyle(NodeType.MEASURE)
+            viewDataBinding.arMeasureIcon.visibility = View.VISIBLE
+            viewDataBinding.arMeasureCenterAnchor.visibility = View.VISIBLE
+        }
+
+        viewDataBinding.arPointer.setOnClickListener {
+            if (LensSDK.isARMode()) {
+                LensSDK.setArDrawingStyle(NodeType.POINTER)
+            }
+            LensSDK.setAnnotationDrawStyle(AnnotationType.POINTER, "#FF004E", 5f)
+            viewDataBinding.arMeasureIcon.visibility = View.GONE
+            viewDataBinding.arMeasureCenterAnchor.visibility = View.GONE
+        }
+
+        viewDataBinding.planeDetection.setOnCheckedChangeListener { _, isChecked ->
+            LensSDK.setPlaneDetection(isChecked)
+        }
+
+        viewDataBinding.pointCloud.setOnCheckedChangeListener { _, isChecked ->
+            LensSDK.setPointCloud(isChecked)
+        }
+
+        viewDataBinding.arMeasureIcon.setOnClickListener {
+            LensSDK.onTapForArMeasurement()
         }
 
         chatLetState.observe(this) { state ->
             state?.let {
                 when (it) {
                     ChatLetState.SUCCESS -> {
-                        chat_button.visibility = View.VISIBLE
+                        viewDataBinding.chatButton.visibility = View.VISIBLE
                     }
                     ChatLetState.ERROR, ChatLetState.LOADING -> {
-                        chat_button.visibility = View.GONE
+                        viewDataBinding.chatButton.visibility = View.GONE
                     }
                 }
             }
         }
+
+        LensSDK.setArPlacingListenerForCustomer(object : ARAnchorPlacedListenerForCustomer {
+            override fun anchorPlaced() {
+
+            }
+
+            override fun arPointerPlaced() {
+
+            }
+
+            override fun anchorPlacingFailed(trackingFailureReason: TrackingFailureReason) {
+                if (trackingFailureReason == TrackingFailureReason.ANNOTATION_NOT_AVAILABLE_WITH_CURRENT_LICENSE) {
+                    Toast.makeText(this@LensSample, "Annotation available only in Standard / Professional edition. Upgrade to use.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun anchorRemoved() {
+
+            }
+        })
     }
 
     fun onLiveTextScanCompleted(resultText: String) {
@@ -264,9 +367,9 @@ class LensSample : AppCompatActivity() {
                 chatFragment.dismiss()
                 Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show()
             }
-            chat_button.visibility = View.GONE
+            viewDataBinding.chatButton.visibility = View.GONE
         } else {
-            chat_button.visibility = View.VISIBLE
+            viewDataBinding.chatButton.visibility = View.VISIBLE
         }
     }
 
@@ -305,7 +408,7 @@ class LensSample : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         val uris = mutableListOf<Uri>()
-        if (requestCode == 100 && resultCode == Activity.RESULT_OK){
+        if (requestCode == 100 && resultCode == Activity.RESULT_OK) {
             val clipData = data?.clipData
             if (clipData != null) {
                 for (i in 0 until clipData.itemCount) {
