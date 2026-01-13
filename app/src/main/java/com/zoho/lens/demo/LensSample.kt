@@ -5,12 +5,17 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProviders
@@ -47,6 +52,17 @@ class LensSample : AppCompatActivity() {
 
         LensSDK.onCreate(this)
         viewDataBinding = DataBindingUtil.setContentView(this, R.layout.activity_lens)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        viewDataBinding.let { binding ->
+            ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _: View?, insets: WindowInsetsCompat ->
+                val systemBar = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.navigationBars())
+                val navigationBar = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+                val dp16 = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16f, resources.displayMetrics).toInt()
+                val dp08 = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 08f, resources.displayMetrics).toInt()
+                viewDataBinding.buttonLayout.updatePadding(left = systemBar.left, top = systemBar.top, right = systemBar.right)
+                insets
+            }
+        }
 
         var isAR = false
         sessionKey = intent.getStringExtra("sessionKey")
